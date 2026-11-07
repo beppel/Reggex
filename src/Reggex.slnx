@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Reggex.Core.Tests/Reggex.Core.Tests.csproj" />
+  <Project Path="Reggex.Core/Reggex.Core.csproj" />
+  <Project Path="Reggex.Desktop/Reggex.Desktop.csproj" />
+</Solution>
