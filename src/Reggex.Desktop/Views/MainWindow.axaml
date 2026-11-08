@@ -9,10 +9,10 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Reggex — Regular Expression Tester"
         RequestedThemeVariant="Dark"
-        Width="1240" Height="860" MinWidth="760" MinHeight="620"
+        Width="1240" Height="860" MinWidth="760" MinHeight="680"
         Background="#10141B">
 
-    <Grid RowDefinitions="Auto,Auto,*,220" Margin="24" RowSpacing="16">
+    <Grid RowDefinitions="Auto,Auto,*" Margin="24" RowSpacing="16">
         <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
             <StackPanel Spacing="2" VerticalAlignment="Center">
                 <TextBlock Text="Reggex" FontSize="25" FontWeight="Bold" />
@@ -42,147 +42,230 @@
             </WrapPanel>
         </Border>
 
-        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="16">
-            <Border Background="#171D27" BorderBrush="#293343" BorderThickness="1"
-                    CornerRadius="12" Padding="16">
-                <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="REGEX" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
-                                   VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
+        <Grid Grid.Row="2">
+            <Grid IsVisible="{Binding IsFindMode}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="220" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="3*" MinHeight="190" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                        CornerRadius="12" Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="REGEX" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
+                        </Grid>
+                        <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
+                                 FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
+                                 PlaceholderText="Enter a regular expression…" />
+                        <Border Grid.Row="2" IsVisible="{Binding HasError}" Background="#3A2027"
+                                BorderBrush="#8B3948" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFB8C1" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding ErrorPosition}" Foreground="#D9949F" FontSize="11"
+                                           IsVisible="{Binding HasErrorPosition}" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Grid.Row="3" Text="Changes are evaluated automatically · 500 ms timeout"
+                                   FontSize="11" Foreground="#77869A" />
                     </Grid>
+                </Border>
 
-                    <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
-                             AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
-                             FontFamily="Consolas" FontSize="14" Padding="12"
-                             PlaceholderText="Enter a regular expression…" />
+                <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center" Cursor="SizeNorthSouth" />
 
-                    <Border Grid.Row="2" IsVisible="{Binding HasError}" Background="#3A2027"
-                            BorderBrush="#8B3948" BorderThickness="1" CornerRadius="7" Padding="10">
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFB8C1" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding ErrorPosition}" Foreground="#D9949F" FontSize="11"
-                                       IsVisible="{Binding HasErrorPosition}" />
-                        </StackPanel>
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="220" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" MinWidth="220" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                            CornerRadius="12" Padding="16">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                            </Grid>
+                            <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                     FontFamily="Consolas" FontSize="14" Padding="12"
+                                     PlaceholderText="Enter text to test…" />
+                        </Grid>
                     </Border>
 
-                    <TextBlock Grid.Row="3" Text="Changes are evaluated automatically · 500 ms timeout"
-                               FontSize="11" Foreground="#77869A" />
+                    <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                                  HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
+
+                    <Border Grid.Column="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                            CornerRadius="12" Padding="16">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="MATCHES" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Evaluating…" Foreground="#93A6BE" IsVisible="{Binding IsEvaluating}" />
+                                    <TextBlock Text="{Binding MatchCountText}" Foreground="#A9C8FF" />
+                                </StackPanel>
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <TextBlock Text="No matches found" Foreground="#77869A" VerticalAlignment="Center"
+                                           HorizontalAlignment="Center" IsVisible="{Binding HasNoMatches}" />
+                                <ScrollViewer IsVisible="{Binding HasMatches}">
+                                    <ItemsControl ItemsSource="{Binding Matches}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#202735" CornerRadius="8" Padding="10" Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                                        <TextBlock Text="{Binding Value}" FontFamily="Consolas" TextWrapping="Wrap" />
+                                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                                            <TextBlock Text="{Binding Index, StringFormat='Index {0}'}"
+                                                                       Foreground="#93A1B5" FontSize="11" />
+                                                            <TextBlock Text="{Binding Length, StringFormat='Length {0}'}"
+                                                                       Foreground="#93A1B5" FontSize="11" />
+                                                        </StackPanel>
+                                                        <ItemsControl Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding Groups}"
+                                                                      Margin="0,6,0,0">
+                                                            <ItemsControl.ItemsPanel>
+                                                                <ItemsPanelTemplate>
+                                                                    <WrapPanel />
+                                                                </ItemsPanelTemplate>
+                                                            </ItemsControl.ItemsPanel>
+                                                            <ItemsControl.ItemTemplate>
+                                                                <DataTemplate>
+                                                                    <Border Background="#293548" CornerRadius="5" Padding="6,3"
+                                                                            Margin="0,0,6,4">
+                                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                                            <TextBlock Text="{Binding Name}" Foreground="#A9C8FF"
+                                                                                       FontSize="10" />
+                                                                            <TextBlock Text="=" Foreground="#77869A" FontSize="10" />
+                                                                            <TextBlock Text="{Binding Value}" Foreground="#C5D2E3"
+                                                                                       FontSize="10" />
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </ItemsControl.ItemTemplate>
+                                                        </ItemsControl>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </Grid>
-            </Border>
+            </Grid>
 
-            <Grid Grid.Column="1">
-                <Border IsVisible="{Binding IsFindMode}" Background="#171D27" BorderBrush="#293343"
-                        BorderThickness="1" CornerRadius="12" Padding="16">
-                    <Grid RowDefinitions="Auto,*" RowSpacing="10">
+            <Grid IsVisible="{Binding IsReplaceMode}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" MinHeight="220" />
+                    <RowDefinition Height="8" />
+                    <RowDefinition Height="3*" MinHeight="248" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                        CornerRadius="12" Padding="16">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
                         <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="TEST INPUT" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                            <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
-                        </Grid>
-                        <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
-                                 AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                                 FontFamily="Consolas" FontSize="14" Padding="12"
-                                 PlaceholderText="Enter text to test…" />
-                    </Grid>
-                </Border>
-
-                <Border IsVisible="{Binding IsReplaceMode}" Background="#171D27" BorderBrush="#293343"
-                        BorderThickness="1" CornerRadius="12" Padding="16">
-                    <Grid RowDefinitions="Auto,*,Auto,*" RowSpacing="10">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="TEST INPUT" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                            <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
-                        </Grid>
-                        <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
-                                 AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                                 FontFamily="Consolas" FontSize="14" Padding="12"
-                                 PlaceholderText="Enter text to test…" />
-
-                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
-                            <TextBlock Text="REPLACEMENT" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
+                            <TextBlock Text="REGEX" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
                                        VerticalAlignment="Center" />
-                            <TextBlock Grid.Column="1" Text="supports .NET replacement syntax" FontSize="11"
-                                       Foreground="#77869A" />
+                            <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
                         </Grid>
-                        <TextBox Grid.Row="3" Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}"
-                                 AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                                 FontFamily="Consolas" FontSize="14" Padding="12"
-                                 PlaceholderText="Replacement text…" />
+                        <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
+                                 FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
+                                 PlaceholderText="Enter a regular expression…" />
+                        <Border Grid.Row="2" IsVisible="{Binding HasError}" Background="#3A2027"
+                                BorderBrush="#8B3948" BorderThickness="1" CornerRadius="7" Padding="10">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFB8C1" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding ErrorPosition}" Foreground="#D9949F" FontSize="11"
+                                           IsVisible="{Binding HasErrorPosition}" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Grid.Row="3" Text="Changes are evaluated automatically · 500 ms timeout"
+                                   FontSize="11" Foreground="#77869A" />
                     </Grid>
                 </Border>
+
+                <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center" Cursor="SizeNorthSouth" />
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="220" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" MinWidth="300" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                            CornerRadius="12" Padding="16">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                            </Grid>
+                            <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                     FontFamily="Consolas" FontSize="14" Padding="12"
+                                     PlaceholderText="Enter text to test…" />
+                        </Grid>
+                    </Border>
+
+                    <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                                  HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
+
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" MinHeight="120" />
+                            <RowDefinition Height="8" />
+                            <RowDefinition Height="*" MinHeight="120" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                                CornerRadius="12" Padding="16">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                                <WrapPanel VerticalAlignment="Center">
+                                    <TextBlock Text="REPLACEMENT" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
+                                               VerticalAlignment="Center" Margin="0,0,12,0" />
+                                    <TextBlock Text=".NET replacement syntax" FontSize="11"
+                                               Foreground="#77869A" TextWrapping="Wrap" />
+                                </WrapPanel>
+                                <TextBox Grid.Row="1" Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                         FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="60"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         PlaceholderText="Replacement text…" />
+                            </Grid>
+                        </Border>
+                        <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                                      HorizontalAlignment="Stretch" VerticalAlignment="Center" Cursor="SizeNorthSouth" />
+                        <Border Grid.Row="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                                CornerRadius="12" Padding="16">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <TextBlock Text="OUTPUT" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                    <TextBlock Grid.Column="1" Text="{Binding MatchCountText}" Foreground="#A9C8FF"
+                                               TextAlignment="Right" TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                                <TextBox Grid.Row="1" Text="{Binding ReplacementOutput}" IsReadOnly="True"
+                                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                         HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                         FontFamily="Consolas" FontSize="13" Padding="12" MinHeight="60"
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         PlaceholderText="The replaced text will appear here…" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
-
-        <Border Grid.Row="3" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
-                CornerRadius="12" Padding="16">
-            <Grid>
-                <Grid IsVisible="{Binding IsFindMode}" RowDefinitions="Auto,*" RowSpacing="10">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="MATCHES" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="Evaluating…" Foreground="#93A6BE" IsVisible="{Binding IsEvaluating}" />
-                            <TextBlock Text="{Binding MatchCountText}" Foreground="#A9C8FF" />
-                        </StackPanel>
-                    </Grid>
-                    <Grid Grid.Row="1">
-                        <TextBlock Text="No matches found" Foreground="#77869A" VerticalAlignment="Center"
-                                   HorizontalAlignment="Center" IsVisible="{Binding HasNoMatches}" />
-                        <ScrollViewer IsVisible="{Binding HasMatches}">
-                            <ItemsControl ItemsSource="{Binding Matches}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#202735" CornerRadius="8" Padding="10" Margin="0,0,0,8">
-                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                                <TextBlock Text="{Binding Value}" FontFamily="Consolas" TextWrapping="Wrap" />
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Text="{Binding Index, StringFormat='Index {0}'}"
-                                                               Foreground="#93A1B5" FontSize="11" />
-                                                    <TextBlock Text="{Binding Length, StringFormat='Length {0}'}"
-                                                               Foreground="#93A1B5" FontSize="11" />
-                                                </StackPanel>
-                                                <ItemsControl Grid.Row="1" Grid.ColumnSpan="2" ItemsSource="{Binding Groups}"
-                                                              Margin="0,6,0,0">
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <WrapPanel />
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <Border Background="#293548" CornerRadius="5" Padding="6,3"
-                                                                    Margin="0,0,6,4">
-                                                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                                                    <TextBlock Text="{Binding Name}" Foreground="#A9C8FF"
-                                                                               FontSize="10" />
-                                                                    <TextBlock Text="=" Foreground="#77869A" FontSize="10" />
-                                                                    <TextBlock Text="{Binding Value}" Foreground="#C5D2E3"
-                                                                               FontSize="10" />
-                                                                </StackPanel>
-                                                            </Border>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </Grid>
-
-                <Grid IsVisible="{Binding IsReplaceMode}" RowDefinitions="Auto,*" RowSpacing="10">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="REPLACEMENT PREVIEW" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                        <TextBlock Grid.Column="1" Text="{Binding MatchCountText}" Foreground="#A9C8FF" />
-                    </Grid>
-                    <TextBox Grid.Row="1" Text="{Binding ReplacementOutput}" IsReadOnly="True"
-                             AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                             FontFamily="Consolas" FontSize="13" Padding="12"
-                             PlaceholderText="The replaced text will appear here…" />
-                </Grid>
-            </Grid>
-        </Border>
     </Grid>
 
     <Window.Styles>
@@ -197,6 +280,9 @@
         </Style>
         <Style Selector="RadioButton.mode-selector">
             <Setter Property="Padding" Value="12,7" />
+        </Style>
+        <Style Selector="GridSplitter">
+            <Setter Property="Background" Value="#293343" />
         </Style>
     </Window.Styles>
 
