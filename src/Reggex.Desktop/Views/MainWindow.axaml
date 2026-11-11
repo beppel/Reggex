@@ -111,7 +111,7 @@
                                 <TextBlock Text="PREVIEW" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
                                 <TextBlock Grid.Column="1" Text="read-only" FontSize="11" Foreground="#77869A" />
                             </Grid>
-                            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer x:Name="PreviewScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                                 <TextBlock x:Name="HighlightedPreview" FontFamily="Consolas" FontSize="14"
                                            Foreground="#E5EAF1" TextWrapping="Wrap" />
                             </ScrollViewer>
@@ -138,7 +138,8 @@
                                     <ItemsControl ItemsSource="{Binding Matches}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border Background="#202735" CornerRadius="8" Padding="10" Margin="0,0,0,8">
+                                                <Border Background="#202735" CornerRadius="8" Padding="10" Margin="0,0,0,8"
+                                                        Cursor="Hand" PointerPressed="OnMatchPointerPressed">
                                                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                                         <TextBlock Text="{Binding Value}" FontFamily="Consolas" TextWrapping="Wrap" />
                                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">

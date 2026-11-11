@@ -51,6 +51,9 @@ public partial class MainViewModel : ViewModelBase
     private ImmutableArray<PreviewSegment> _previewSegments = [];
 
     [ObservableProperty]
+    private int _selectedMatchIndex = -1;
+
+    [ObservableProperty]
     private string _replacementOutput = string.Empty;
 
     [ObservableProperty]
@@ -162,6 +165,7 @@ public partial class MainViewModel : ViewModelBase
         var replaceMode = IsReplaceMode;
 
         IsEvaluating = true;
+        SelectedMatchIndex = -1;
         PreviewSegments = BuildPreviewSegments(input, []);
         HasError = false;
         ErrorMessage = string.Empty;
@@ -194,7 +198,7 @@ public partial class MainViewModel : ViewModelBase
             Matches = evaluation.Result.Matches;
             PreviewSegments = BuildPreviewSegments(input, evaluation.Result.Status == RegexExecutionStatus.Success
                 ? evaluation.Result.Matches
-                : []);
+                : [], GetSelectedMatch(evaluation.Result.Matches));
             ReplacementOutput = evaluation.ReplacementOutput;
             HasError = evaluation.Result.Status != RegexExecutionStatus.Success;
             ErrorMessage = GetErrorMessage(evaluation.Result);
@@ -273,7 +277,8 @@ public partial class MainViewModel : ViewModelBase
 
     private static ImmutableArray<PreviewSegment> BuildPreviewSegments(
         string input,
-        ImmutableArray<RegexMatchResult> matches)
+        ImmutableArray<RegexMatchResult> matches,
+        RegexMatchResult? selectedMatch = null)
     {
         var ranges = matches
             .Where(match => match.Length > 0)
@@ -293,7 +298,8 @@ public partial class MainViewModel : ViewModelBase
         {
             if (zeroLengthPositions.Remove(offset))
             {
-                segments.Add(new PreviewSegment("│", true, true));
+                segments.Add(new PreviewSegment("│", true, true,
+                    selectedMatch is { Length: 0 } && selectedMatch.Index == offset));
             }
 
             if (offset == input.Length)
@@ -307,17 +313,39 @@ public partial class MainViewModel : ViewModelBase
             }
 
             var highlighted = rangeIndex < ranges.Length && ranges[rangeIndex].Start <= offset;
+            var selected = selectedMatch is { Length: > 0 } &&
+                offset >= selectedMatch.Index && offset < selectedMatch.Index + selectedMatch.Length;
             var end = highlighted ? ranges[rangeIndex].End :
                 rangeIndex < ranges.Length ? ranges[rangeIndex].Start : input.Length;
+            if (selectedMatch is { Length: > 0 } && selectedMatch.Index > offset)
+            {
+                end = Math.Min(end, selectedMatch.Index);
+            }
+            if (selected)
+            {
+                end = Math.Min(end, selectedMatch!.Index + selectedMatch.Length);
+            }
             end = Math.Clamp(end, offset + 1, input.Length);
-            segments.Add(new PreviewSegment(input[offset..end], highlighted, false));
+            segments.Add(new PreviewSegment(input[offset..end], highlighted, false, selected));
             offset = end;
         }
 
         return segments.ToImmutable();
     }
 
+    public void SelectMatch(RegexMatchResult match)
+    {
+        ArgumentNullException.ThrowIfNull(match);
+        SelectedMatchIndex = Matches.IndexOf(match);
+        PreviewSegments = BuildPreviewSegments(TestInput, Matches, match);
+    }
+
+    private RegexMatchResult? GetSelectedMatch(ImmutableArray<RegexMatchResult> matches)
+        => SelectedMatchIndex >= 0 && SelectedMatchIndex < matches.Length
+            ? matches[SelectedMatchIndex]
+            : null;
+
     private sealed record Evaluation(RegexExecutionResult Result, string ReplacementOutput);
 }
 
-public sealed record PreviewSegment(string Text, bool IsHighlighted, bool IsPositionMarker);
+public sealed record PreviewSegment(string Text, bool IsHighlighted, bool IsPositionMarker, bool IsSelected = false);
