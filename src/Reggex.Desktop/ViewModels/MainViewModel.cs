@@ -48,6 +48,9 @@ public partial class MainViewModel : ViewModelBase
     private ImmutableArray<RegexMatchResult> _matches = [];
 
     [ObservableProperty]
+    private ImmutableArray<PreviewSegment> _previewSegments = [];
+
+    [ObservableProperty]
     private string _replacementOutput = string.Empty;
 
     [ObservableProperty]
@@ -159,6 +162,7 @@ public partial class MainViewModel : ViewModelBase
         var replaceMode = IsReplaceMode;
 
         IsEvaluating = true;
+        PreviewSegments = BuildPreviewSegments(input, []);
         HasError = false;
         ErrorMessage = string.Empty;
         ErrorPosition = string.Empty;
@@ -188,6 +192,9 @@ public partial class MainViewModel : ViewModelBase
             }
 
             Matches = evaluation.Result.Matches;
+            PreviewSegments = BuildPreviewSegments(input, evaluation.Result.Status == RegexExecutionStatus.Success
+                ? evaluation.Result.Matches
+                : []);
             ReplacementOutput = evaluation.ReplacementOutput;
             HasError = evaluation.Result.Status != RegexExecutionStatus.Success;
             ErrorMessage = GetErrorMessage(evaluation.Result);
@@ -208,6 +215,7 @@ public partial class MainViewModel : ViewModelBase
             }
 
             Matches = [];
+            PreviewSegments = BuildPreviewSegments(input, []);
             ReplacementOutput = string.Empty;
             HasError = true;
             ErrorMessage = $"The selected regex options are not supported together. {exception.Message}";
@@ -263,5 +271,53 @@ public partial class MainViewModel : ViewModelBase
             _ => string.Empty
         };
 
+    private static ImmutableArray<PreviewSegment> BuildPreviewSegments(
+        string input,
+        ImmutableArray<RegexMatchResult> matches)
+    {
+        var ranges = matches
+            .Where(match => match.Length > 0)
+            .Select(match => (Start: match.Index, End: match.Index + match.Length))
+            .OrderBy(range => range.Start)
+            .ThenBy(range => range.End)
+            .ToArray();
+        var zeroLengthPositions = matches
+            .Where(match => match.Length == 0)
+            .Select(match => match.Index)
+            .ToHashSet();
+        var segments = ImmutableArray.CreateBuilder<PreviewSegment>();
+        var offset = 0;
+        var rangeIndex = 0;
+
+        while (offset <= input.Length)
+        {
+            if (zeroLengthPositions.Remove(offset))
+            {
+                segments.Add(new PreviewSegment("│", true, true));
+            }
+
+            if (offset == input.Length)
+            {
+                break;
+            }
+
+            while (rangeIndex < ranges.Length && ranges[rangeIndex].End <= offset)
+            {
+                rangeIndex++;
+            }
+
+            var highlighted = rangeIndex < ranges.Length && ranges[rangeIndex].Start <= offset;
+            var end = highlighted ? ranges[rangeIndex].End :
+                rangeIndex < ranges.Length ? ranges[rangeIndex].Start : input.Length;
+            end = Math.Clamp(end, offset + 1, input.Length);
+            segments.Add(new PreviewSegment(input[offset..end], highlighted, false));
+            offset = end;
+        }
+
+        return segments.ToImmutable();
+    }
+
     private sealed record Evaluation(RegexExecutionResult Result, string ReplacementOutput);
 }
+
+public sealed record PreviewSegment(string Text, bool IsHighlighted, bool IsPositionMarker);

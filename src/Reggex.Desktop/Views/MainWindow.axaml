@@ -80,9 +80,11 @@
 
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MinWidth="220" />
+                        <ColumnDefinition Width="*" MinWidth="180" />
                         <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="*" MinWidth="220" />
+                        <ColumnDefinition Width="*" MinWidth="180" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition Width="*" MinWidth="180" />
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
@@ -103,6 +105,23 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
 
                     <Border Grid.Column="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                            CornerRadius="12" Padding="16">
+                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="PREVIEW" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                <TextBlock Grid.Column="1" Text="read-only" FontSize="11" Foreground="#77869A" />
+                            </Grid>
+                            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                <TextBlock x:Name="HighlightedPreview" FontFamily="Consolas" FontSize="14"
+                                           Foreground="#E5EAF1" TextWrapping="Wrap" />
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <GridSplitter Grid.Column="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                                  HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
+
+                    <Border Grid.Column="4" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
                             CornerRadius="12" Padding="16">
                         <Grid RowDefinitions="Auto,*" RowSpacing="10">
                             <Grid ColumnDefinitions="*,Auto">
