@@ -1,8 +1,8 @@
 using Avalonia.Controls;
-using Avalonia.Media;
-using Avalonia.Controls.Documents;
+using AvaloniaEdit;
 using Reggex.Desktop.ViewModels;
 using Reggex.Core;
+using AvaloniaEdit.Rendering;
 using System.ComponentModel;
 
 namespace Reggex.Desktop.Views;
@@ -10,12 +10,15 @@ namespace Reggex.Desktop.Views;
 public partial class MainWindow : Window
 {
     private MainViewModel? _subscribedViewModel;
+    private RegexMatchHighlighter? _matchHighlighter;
+    private TextEditor? _sourceEditor;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContextChanged += (_, _) =>
         {
+            _sourceEditor = this.FindControl<TextEditor>("SourceEditor");
             if (_subscribedViewModel is not null)
             {
                 _subscribedViewModel.PropertyChanged -= OnViewModelPropertyChanged;
@@ -24,20 +27,33 @@ public partial class MainWindow : Window
             if (_subscribedViewModel is not null)
             {
                 _subscribedViewModel.PropertyChanged += OnViewModelPropertyChanged;
+                UpdateSourceEditorText();
             }
-            UpdatePreview();
+            AttachMatchHighlighter();
+            UpdateSourceHighlights();
         };
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(MainViewModel.PreviewSegments))
+        if (args.PropertyName == nameof(MainViewModel.TestInput))
         {
-            UpdatePreview();
+            UpdateSourceEditorText();
         }
-        else if (args.PropertyName == nameof(MainViewModel.SelectedMatchIndex))
+        else if (args.PropertyName == nameof(MainViewModel.Matches) ||
+            args.PropertyName == nameof(MainViewModel.SelectedMatchIndex) ||
+            args.PropertyName == nameof(MainViewModel.IsEvaluating))
         {
-            ScrollPreviewToSelectedMatch();
+            UpdateSourceHighlights();
+        }
+    }
+
+    private void OnSourceTextChanged(object? sender, EventArgs args)
+    {
+        if (_sourceEditor is not null && DataContext is MainViewModel viewModel &&
+            !string.Equals(viewModel.TestInput, _sourceEditor.Text, StringComparison.Ordinal))
+        {
+            viewModel.TestInput = _sourceEditor.Text;
         }
     }
 
@@ -46,53 +62,44 @@ public partial class MainWindow : Window
         if (sender is Border { DataContext: RegexMatchResult match } && DataContext is MainViewModel viewModel)
         {
             viewModel.SelectMatch(match);
-        }
-    }
-
-    private void UpdatePreview()
-    {
-        if (DataContext is not MainViewModel viewModel || this.FindControl<TextBlock>("HighlightedPreview") is not { } preview)
-        {
-            return;
-        }
-
-        var inlines = preview.Inlines;
-        if (inlines is null)
-        {
-            return;
-        }
-
-        inlines.Clear();
-        foreach (var segment in viewModel.PreviewSegments)
-        {
-            var run = new Run(segment.Text);
-            if (segment.IsHighlighted)
+            if (_sourceEditor is not null && match.Index >= 0 && match.Index <= _sourceEditor.Document.TextLength)
             {
-                run.Background = Brush.Parse(segment.IsSelected || segment.IsPositionMarker ? "#D99735" : "#365B8C");
-                run.Foreground = Brush.Parse("#F3F7FC");
+                _sourceEditor.TextArea.Caret.Offset = match.Index;
             }
-            inlines.Add(run);
         }
-
-        ScrollPreviewToSelectedMatch();
     }
 
-    private void ScrollPreviewToSelectedMatch()
+    private void AttachMatchHighlighter()
     {
-        if (DataContext is not MainViewModel { SelectedMatchIndex: >= 0 } viewModel ||
-            this.FindControl<ScrollViewer>("PreviewScrollViewer") is not { } scrollViewer ||
-            viewModel.SelectedMatchIndex >= viewModel.Matches.Length)
+        if (_sourceEditor is null || _matchHighlighter is not null)
         {
             return;
         }
 
-        var start = viewModel.Matches[viewModel.SelectedMatchIndex].Index;
-        var line = 0;
-        for (var i = 0; i < Math.Min(start, viewModel.TestInput.Length); i++)
+        _matchHighlighter = new RegexMatchHighlighter();
+        _sourceEditor.TextArea.TextView.LineTransformers.Add(_matchHighlighter);
+        _sourceEditor.TextArea.TextView.BackgroundRenderers.Add(_matchHighlighter);
+    }
+
+    private void UpdateSourceHighlights()
+    {
+        if (DataContext is not MainViewModel viewModel || _sourceEditor is null || _matchHighlighter is null)
         {
-            if (viewModel.TestInput[i] == '\n') line++;
+            return;
         }
 
-        scrollViewer.Offset = new Avalonia.Vector(scrollViewer.Offset.X, Math.Max(0, line * 20d));
+        var matches = viewModel.IsEvaluating ? [] : viewModel.Matches;
+        _matchHighlighter.SetMatches(matches, viewModel.SelectedMatchIndex);
+        _sourceEditor.TextArea.TextView.Redraw();
+        _sourceEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Background);
+    }
+
+    private void UpdateSourceEditorText()
+    {
+        if (_sourceEditor is not null && DataContext is MainViewModel viewModel &&
+            !string.Equals(_sourceEditor.Text, viewModel.TestInput, StringComparison.Ordinal))
+        {
+            _sourceEditor.Text = viewModel.TestInput;
+        }
     }
 }

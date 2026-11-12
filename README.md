@@ -1,11 +1,11 @@
 # Reggex
 
-Reggex is a desktop application for building and testing .NET regular expressions. Edit a pattern and sample text side by side, inspect every match and its groups, and see matching text highlighted in a separate preview.
+Reggex is a desktop application for building and testing .NET regular expressions. Edit a pattern and sample text side by side, inspect every match and its groups, and see matching text highlighted directly in the editable source editor.
 
 ## Features
 
 - **Find** evaluates a pattern against editable sample text and lists all matches with their positions, lengths, and captured groups.
-- **Match highlighting** keeps the source text editable while showing a read-only preview. Select a match to emphasize it in the preview; zero-length matches are shown with a position marker.
+- **Match highlighting** marks all matches directly in the editable source text. Select a match to emphasize it and move the editor to its position; zero-length matches are shown with position markers.
 - **Replace** previews the result using .NET replacement syntax, including named groups.
 - **Regex options** include Ignore case, Multiline, Singleline, Explicit capture, Ignore pattern whitespace, Right to left, and ECMAScript.
 - **Immediate feedback** updates as you edit, reports invalid patterns, and limits regex execution to 500 ms.

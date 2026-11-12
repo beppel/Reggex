@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Reggex.Desktop.ViewModels"
+        xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="760"
@@ -80,11 +81,9 @@
 
                 <Grid Grid.Row="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" MinWidth="180" />
+                        <ColumnDefinition Width="2*" MinWidth="320" />
                         <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="*" MinWidth="180" />
-                        <ColumnDefinition Width="8" />
-                        <ColumnDefinition Width="*" MinWidth="180" />
+                        <ColumnDefinition Width="*" MinWidth="220" />
                     </Grid.ColumnDefinitions>
 
                     <Border Grid.Column="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
@@ -92,12 +91,16 @@
                         <Grid RowDefinitions="Auto,*" RowSpacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                                <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                                <TextBlock Grid.Column="1" Text="editable · matches highlighted" FontSize="11" Foreground="#77869A" />
                             </Grid>
-                            <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
-                                     AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
-                                     FontFamily="Consolas" FontSize="14" Padding="12"
-                                     PlaceholderText="Enter text to test…" />
+                            <Border Grid.Row="1" Background="#111720" BorderBrush="#303B4C" BorderThickness="1"
+                                    CornerRadius="5">
+                                <avaloniaEdit:TextEditor x:Name="SourceEditor"
+                                                         TextChanged="OnSourceTextChanged"
+                                                         FontFamily="Consolas" FontSize="14"
+                                                         ShowLineNumbers="False" WordWrap="True"
+                                                         Background="#111720" Foreground="#E5EAF1" />
+                            </Border>
                         </Grid>
                     </Border>
 
@@ -105,23 +108,6 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
 
                     <Border Grid.Column="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
-                            CornerRadius="12" Padding="16">
-                        <Grid RowDefinitions="Auto,*" RowSpacing="10">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="PREVIEW" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                                <TextBlock Grid.Column="1" Text="read-only" FontSize="11" Foreground="#77869A" />
-                            </Grid>
-                            <ScrollViewer x:Name="PreviewScrollViewer" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <TextBlock x:Name="HighlightedPreview" FontFamily="Consolas" FontSize="14"
-                                           Foreground="#E5EAF1" TextWrapping="Wrap" />
-                            </ScrollViewer>
-                        </Grid>
-                    </Border>
-
-                    <GridSplitter Grid.Column="3" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
-                                  HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
-
-                    <Border Grid.Column="4" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
                             CornerRadius="12" Padding="16">
                         <Grid RowDefinitions="Auto,*" RowSpacing="10">
                             <Grid ColumnDefinitions="*,Auto">
