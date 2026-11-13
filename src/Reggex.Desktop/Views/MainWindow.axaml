@@ -40,6 +40,7 @@
                 <CheckBox Content="Singleline" IsChecked="{Binding Singleline}" Margin="4,2" />
                 <CheckBox Content="Explicit capture" IsChecked="{Binding ExplicitCapture}" Margin="4,2" />
                 <CheckBox Content="Ignore pattern whitespace" IsChecked="{Binding IgnorePatternWhitespace}" Margin="4,2" />
+                <CheckBox Content="Culture invariant" IsChecked="{Binding CultureInvariant}" Margin="4,2" />
                 <CheckBox Content="Right to left" IsChecked="{Binding RightToLeft}" Margin="4,2" />
                 <CheckBox Content="ECMAScript" IsChecked="{Binding EcmaScript}" Margin="4,2" />
             </WrapPanel>

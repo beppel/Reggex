@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.RegularExpressions;
 using Reggex.Core;
 
@@ -115,6 +116,30 @@ public class DotNetRegexEngineTests
 
         var match = Assert.Single(result.Matches);
         AssertMatch(match, "CAT", 0, 3);
+    }
+
+    [Fact]
+    public void ExecuteAppliesCultureInvariantToIgnoreCaseMatching()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR");
+
+            var cultureSensitive = Execute("i", "I", RegexOptions.IgnoreCase);
+            var cultureInvariant = Execute(
+                "i",
+                "I",
+                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+            Assert.Empty(cultureSensitive.Matches);
+            Assert.Single(cultureInvariant.Matches);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     [Fact]

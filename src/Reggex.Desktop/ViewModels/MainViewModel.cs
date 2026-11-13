@@ -39,6 +39,9 @@ public partial class MainViewModel : ViewModelBase
     private bool _ignorePatternWhitespace;
 
     [ObservableProperty]
+    private bool _cultureInvariant;
+
+    [ObservableProperty]
     private bool _rightToLeft;
 
     [ObservableProperty]
@@ -137,6 +140,7 @@ public partial class MainViewModel : ViewModelBase
     partial void OnSinglelineChanged(bool value) => ScheduleEvaluation();
     partial void OnExplicitCaptureChanged(bool value) => ScheduleEvaluation();
     partial void OnIgnorePatternWhitespaceChanged(bool value) => ScheduleEvaluation();
+    partial void OnCultureInvariantChanged(bool value) => ScheduleEvaluation();
     partial void OnRightToLeftChanged(bool value) => ScheduleEvaluation();
     partial void OnEcmaScriptChanged(bool value) => ScheduleEvaluation();
 
@@ -306,6 +310,7 @@ public partial class MainViewModel : ViewModelBase
         if (Singleline) options |= RegexOptions.Singleline;
         if (ExplicitCapture) options |= RegexOptions.ExplicitCapture;
         if (IgnorePatternWhitespace) options |= RegexOptions.IgnorePatternWhitespace;
+        if (CultureInvariant) options |= RegexOptions.CultureInvariant;
         if (RightToLeft) options |= RegexOptions.RightToLeft;
         if (EcmaScript) options |= RegexOptions.ECMAScript;
         return options;
