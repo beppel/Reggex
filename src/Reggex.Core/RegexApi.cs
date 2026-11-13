@@ -52,6 +52,9 @@ public interface IRegexEngine
 
     /// <summary>Applies a replacement expression and returns replaced text or structured failure information.</summary>
     RegexReplacementResult Replace(RegexRequest request, string replacement);
+
+    /// <summary>Splits the input text and returns segments or structured failure information.</summary>
+    RegexSplitResult Split(RegexRequest request);
 }
 
 /// <summary>Identifies the outcome of a regex execution.</summary>
@@ -179,6 +182,57 @@ public sealed record RegexReplacementResult
         => new(
             RegexExecutionStatus.TimedOut,
             string.Empty,
+            new RegexExecutionError(RegexExecutionErrorCode.Timeout, details));
+}
+
+/// <summary>Contains the segments or error produced by a split operation.</summary>
+public sealed record RegexSplitResult
+{
+    /// <summary>The split operation outcome.</summary>
+    public RegexExecutionStatus Status { get; }
+
+    /// <summary>The resulting segments on success; empty when splitting failed.</summary>
+    public ImmutableArray<string> Segments { get; }
+
+    /// <summary>Structured error details for a failed split; otherwise null.</summary>
+    public RegexExecutionError? Error { get; }
+
+    private RegexSplitResult(
+        RegexExecutionStatus status,
+        ImmutableArray<string> segments,
+        RegexExecutionError? error)
+    {
+        Status = status;
+        Segments = segments;
+        Error = error;
+    }
+
+    /// <summary>Creates a successful split result.</summary>
+    public static RegexSplitResult Succeeded(IEnumerable<string> segments)
+    {
+        ArgumentNullException.ThrowIfNull(segments);
+        return new RegexSplitResult(RegexExecutionStatus.Success, segments.ToImmutableArray(), null);
+    }
+
+    /// <summary>Creates a result for a pattern rejected by the engine.</summary>
+    public static RegexSplitResult InvalidPattern(string? details = null, int? position = null)
+    {
+        if (position < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(position), "The error position cannot be negative.");
+        }
+
+        return new RegexSplitResult(
+            RegexExecutionStatus.InvalidPattern,
+            ImmutableArray<string>.Empty,
+            new RegexExecutionError(RegexExecutionErrorCode.InvalidPattern, details, position));
+    }
+
+    /// <summary>Creates a result for a split operation that exceeded its timeout.</summary>
+    public static RegexSplitResult TimedOut(string? details = null)
+        => new(
+            RegexExecutionStatus.TimedOut,
+            ImmutableArray<string>.Empty,
             new RegexExecutionError(RegexExecutionErrorCode.Timeout, details));
 }
 

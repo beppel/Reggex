@@ -54,6 +54,9 @@ public partial class MainViewModel : ViewModelBase
     private string _replacementOutput = string.Empty;
 
     [ObservableProperty]
+    private ImmutableArray<SplitSegmentViewModel> _splitSegments = [];
+
+    [ObservableProperty]
     private bool _hasError;
 
     [ObservableProperty]
@@ -96,15 +99,35 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
+    public bool IsSplitMode
+    {
+        get => SelectedModeIndex == 2;
+        set
+        {
+            if (value)
+            {
+                SelectedModeIndex = 2;
+            }
+        }
+    }
+
     public int MatchCount => Matches.Length;
 
     public bool HasNoMatches => !HasError && !IsEvaluating && Matches.IsEmpty;
 
     public bool HasMatches => !HasError && !IsEvaluating && !Matches.IsEmpty;
 
+    public bool HasNoSplitSegments => !HasError && !IsEvaluating && SplitSegments.IsEmpty;
+
+    public bool HasSplitSegments => !HasError && !IsEvaluating && !SplitSegments.IsEmpty;
+
     public bool HasErrorPosition => !string.IsNullOrEmpty(ErrorPosition);
 
     public string MatchCountText => MatchCount == 1 ? "1 match" : $"{MatchCount} matches";
+
+    public string SplitSegmentCountText => SplitSegments.Length == 1
+        ? "1 segment"
+        : $"{SplitSegments.Length} segments";
 
     partial void OnPatternChanged(string value) => ScheduleEvaluation();
     partial void OnTestInputChanged(string value) => ScheduleEvaluation();
@@ -121,6 +144,7 @@ public partial class MainViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(IsFindMode));
         OnPropertyChanged(nameof(IsReplaceMode));
+        OnPropertyChanged(nameof(IsSplitMode));
         ScheduleEvaluation();
     }
 
@@ -132,16 +156,27 @@ public partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(HasMatches));
     }
 
+    partial void OnSplitSegmentsChanged(ImmutableArray<SplitSegmentViewModel> value)
+    {
+        OnPropertyChanged(nameof(HasNoSplitSegments));
+        OnPropertyChanged(nameof(HasSplitSegments));
+        OnPropertyChanged(nameof(SplitSegmentCountText));
+    }
+
     partial void OnHasErrorChanged(bool value)
     {
         OnPropertyChanged(nameof(HasNoMatches));
         OnPropertyChanged(nameof(HasMatches));
+        OnPropertyChanged(nameof(HasNoSplitSegments));
+        OnPropertyChanged(nameof(HasSplitSegments));
     }
 
     partial void OnIsEvaluatingChanged(bool value)
     {
         OnPropertyChanged(nameof(HasNoMatches));
         OnPropertyChanged(nameof(HasMatches));
+        OnPropertyChanged(nameof(HasNoSplitSegments));
+        OnPropertyChanged(nameof(HasSplitSegments));
     }
 
     partial void OnErrorPositionChanged(string value) => OnPropertyChanged(nameof(HasErrorPosition));
@@ -160,6 +195,7 @@ public partial class MainViewModel : ViewModelBase
         var replacement = Replacement;
         var options = GetRegexOptions();
         var replaceMode = IsReplaceMode;
+        var splitMode = IsSplitMode;
 
         IsEvaluating = true;
         SelectedMatchIndex = -1;
@@ -167,7 +203,7 @@ public partial class MainViewModel : ViewModelBase
         ErrorMessage = string.Empty;
         ErrorPosition = string.Empty;
 
-        _ = EvaluateAfterDelayAsync(pattern, input, replacement, options, replaceMode, version, token);
+        _ = EvaluateAfterDelayAsync(pattern, input, replacement, options, replaceMode, splitMode, version, token);
     }
 
     private async Task EvaluateAfterDelayAsync(
@@ -176,6 +212,7 @@ public partial class MainViewModel : ViewModelBase
         string replacement,
         RegexOptions options,
         bool replaceMode,
+        bool splitMode,
         int version,
         CancellationToken cancellationToken)
     {
@@ -184,7 +221,7 @@ public partial class MainViewModel : ViewModelBase
             await Task.Delay(TimeSpan.FromMilliseconds(180), cancellationToken);
 
             var request = new RegexRequest(pattern, input, options);
-            var evaluation = await Task.Run(() => Evaluate(request, replacement, replaceMode), cancellationToken);
+            var evaluation = await Task.Run(() => Evaluate(request, replacement, replaceMode, splitMode), cancellationToken);
 
             if (cancellationToken.IsCancellationRequested || version != _evaluationVersion)
             {
@@ -193,6 +230,9 @@ public partial class MainViewModel : ViewModelBase
 
             Matches = evaluation.Result.Matches;
             ReplacementOutput = evaluation.ReplacementOutput;
+            SplitSegments = evaluation.SplitSegments
+                .Select((segment, index) => new SplitSegmentViewModel(index, segment))
+                .ToImmutableArray();
             HasError = evaluation.Result.Status != RegexExecutionStatus.Success;
             ErrorMessage = GetErrorMessage(evaluation.Result);
             ErrorPosition = evaluation.Result.Error?.Position is int position
@@ -213,6 +253,7 @@ public partial class MainViewModel : ViewModelBase
 
             Matches = [];
             ReplacementOutput = string.Empty;
+            SplitSegments = [];
             HasError = true;
             ErrorMessage = $"The selected regex options are not supported together. {exception.Message}";
             ErrorPosition = string.Empty;
@@ -220,31 +261,42 @@ public partial class MainViewModel : ViewModelBase
         }
     }
 
-    private Evaluation Evaluate(RegexRequest request, string replacement, bool replaceMode)
+    private Evaluation Evaluate(RegexRequest request, string replacement, bool replaceMode, bool splitMode)
     {
+        if (splitMode)
+        {
+            var splitResult = _regexEngine.Split(request);
+            var splitExecutionResult = ToExecutionResult(splitResult.Status, splitResult.Error);
+            return new Evaluation(splitExecutionResult, string.Empty, splitResult.Segments);
+        }
+
         var result = _regexEngine.Execute(request);
         if (!replaceMode || result.Status != RegexExecutionStatus.Success)
         {
-            return new Evaluation(result, string.Empty);
+            return new Evaluation(result, string.Empty, []);
         }
 
         var replacementResult = _regexEngine.Replace(request, replacement);
         if (replacementResult.Status == RegexExecutionStatus.Success)
         {
-            return new Evaluation(result, replacementResult.Output);
+            return new Evaluation(result, replacementResult.Output, []);
         }
 
-        var failedResult = replacementResult.Status switch
-        {
-            RegexExecutionStatus.InvalidPattern => RegexExecutionResult.InvalidPattern(
-                replacementResult.Error?.Details,
-                replacementResult.Error?.Position),
-            RegexExecutionStatus.TimedOut => RegexExecutionResult.TimedOut(replacementResult.Error?.Details),
-            _ => result
-        };
-
-        return new Evaluation(failedResult, string.Empty);
+        return new Evaluation(ToExecutionResult(replacementResult.Status, replacementResult.Error), string.Empty, []);
     }
+
+    private static RegexExecutionResult ToExecutionResult(
+        RegexExecutionStatus status,
+        RegexExecutionError? error)
+        => status switch
+        {
+            RegexExecutionStatus.Success => RegexExecutionResult.Succeeded([]),
+            RegexExecutionStatus.InvalidPattern => RegexExecutionResult.InvalidPattern(
+                error?.Details,
+                error?.Position),
+            RegexExecutionStatus.TimedOut => RegexExecutionResult.TimedOut(error?.Details),
+            _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Unknown regex execution status.")
+        };
 
     private RegexOptions GetRegexOptions()
     {
@@ -273,5 +325,13 @@ public partial class MainViewModel : ViewModelBase
         SelectedMatchIndex = Matches.IndexOf(match);
     }
 
-    private sealed record Evaluation(RegexExecutionResult Result, string ReplacementOutput);
+    private sealed record Evaluation(
+        RegexExecutionResult Result,
+        string ReplacementOutput,
+        ImmutableArray<string> SplitSegments);
+}
+
+public sealed record SplitSegmentViewModel(int Index, string Value)
+{
+    public string IndexLabel => $"[{Index,3}]:";
 }

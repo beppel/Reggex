@@ -61,6 +61,26 @@ public sealed class DotNetRegexEngine : IRegexEngine
         }
     }
 
+    /// <summary>Splits the input text using the request's options and timeout.</summary>
+    public RegexSplitResult Split(RegexRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        try
+        {
+            var regex = new Regex(request.Pattern, request.Options, request.ExecutionTimeout);
+            return RegexSplitResult.Succeeded(regex.Split(request.InputText));
+        }
+        catch (RegexParseException exception)
+        {
+            return RegexSplitResult.InvalidPattern(exception.Message, exception.Offset);
+        }
+        catch (RegexMatchTimeoutException exception)
+        {
+            return RegexSplitResult.TimedOut(exception.Message);
+        }
+    }
+
     private static RegexGroupResult ConvertGroup(Group group, string name)
     {
         if (!group.Success)

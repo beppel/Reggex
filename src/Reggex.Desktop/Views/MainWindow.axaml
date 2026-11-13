@@ -25,6 +25,8 @@
                              IsChecked="{Binding IsFindMode, Mode=TwoWay}" />
                 <RadioButton Content="Replace" GroupName="ApplicationMode" Classes="mode-selector"
                              IsChecked="{Binding IsReplaceMode, Mode=TwoWay}" />
+                <RadioButton Content="Split" GroupName="ApplicationMode" Classes="mode-selector"
+                             IsChecked="{Binding IsSplitMode, Mode=TwoWay}" />
             </StackPanel>
         </Grid>
 
@@ -269,6 +271,102 @@
                             </Grid>
                         </Border>
                     </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid IsVisible="{Binding IsSplitMode}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="2*" MinHeight="220" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="3*" MinHeight="248" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                            CornerRadius="12" Padding="16">
+                        <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="REGEX" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
+                            </Grid>
+                            <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                                     AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
+                                     FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
+                                     PlaceholderText="Enter a regular expression…" />
+                            <Border Grid.Row="2" IsVisible="{Binding HasError}" Background="#3A2027"
+                                    BorderBrush="#8B3948" BorderThickness="1" CornerRadius="7" Padding="10">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFB8C1" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding ErrorPosition}" Foreground="#D9949F" FontSize="11"
+                                               IsVisible="{Binding HasErrorPosition}" />
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Grid.Row="3" Text="Changes are evaluated automatically · 500 ms timeout"
+                                       FontSize="11" Foreground="#77869A" />
+                        </Grid>
+                    </Border>
+
+                    <GridSplitter Grid.Row="1" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Center" Cursor="SizeNorthSouth" />
+
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" MinWidth="220" />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition Width="*" MinWidth="300" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                                CornerRadius="12" Padding="16">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
+                                    <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                                </Grid>
+                                <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
+                                         AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
+                                         FontFamily="Consolas" FontSize="14" Padding="12"
+                                         PlaceholderText="Enter text to test…" />
+                            </Grid>
+                        </Border>
+
+                        <GridSplitter Grid.Column="1" ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                                      HorizontalAlignment="Center" VerticalAlignment="Stretch" Cursor="SizeWestEast" />
+
+                        <Border Grid.Column="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                                CornerRadius="12" Padding="16">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="SPLIT SEGMENTS" FontSize="11" FontWeight="Bold"
+                                               Foreground="#9BA7B8" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Evaluating…" Foreground="#93A6BE"
+                                                   IsVisible="{Binding IsEvaluating}" />
+                                        <TextBlock Text="{Binding SplitSegmentCountText}" Foreground="#A9C8FF" />
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Grid.Row="1">
+                                    <TextBlock Text="No segments" Foreground="#77869A" VerticalAlignment="Center"
+                                               HorizontalAlignment="Center" IsVisible="{Binding HasNoSplitSegments}" />
+                                    <ScrollViewer IsVisible="{Binding HasSplitSegments}">
+                                        <ItemsControl ItemsSource="{Binding SplitSegments}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#202735" CornerRadius="8" Padding="10"
+                                                            Margin="0,0,0,8">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding IndexLabel}" FontFamily="Consolas" />
+                                                            <TextBlock Text="{Binding Value}" FontFamily="Consolas"
+                                                                       TextWrapping="Wrap" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Grid>
+                        </Border>
                 </Grid>
             </Grid>
         </Grid>
