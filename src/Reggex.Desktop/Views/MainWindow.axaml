@@ -62,7 +62,8 @@
                                        VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
                         </Grid>
-                        <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="FindPatternEditor" Grid.Row="1"
+                                 Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
                                  FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
                                  PlaceholderText="Enter a regular expression…" />
@@ -186,7 +187,8 @@
                                        VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
                         </Grid>
-                        <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox x:Name="ReplacePatternEditor" Grid.Row="1"
+                                 Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
                                  AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
                                  FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
                                  PlaceholderText="Enter a regular expression…" />
@@ -245,7 +247,8 @@
                                     <TextBlock Text=".NET replacement syntax" FontSize="11"
                                                Foreground="#77869A" TextWrapping="Wrap" />
                                 </WrapPanel>
-                                <TextBox Grid.Row="1" Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}"
+                                <TextBox x:Name="ReplacementEditor" Grid.Row="1"
+                                         Text="{Binding Replacement, UpdateSourceTrigger=PropertyChanged}"
                                          AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
                                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                          FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="60"
@@ -290,7 +293,8 @@
                                            VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="1" Text=".NET · multiline" FontSize="11" Foreground="#77869A" />
                             </Grid>
-                            <TextBox Grid.Row="1" Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox x:Name="SplitPatternEditor" Grid.Row="1"
+                                     Text="{Binding Pattern, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="True" TextWrapping="NoWrap" VerticalContentAlignment="Top"
                                      FontFamily="Consolas" FontSize="14" Padding="12" MinHeight="120"
                                      PlaceholderText="Enter a regular expression…" />

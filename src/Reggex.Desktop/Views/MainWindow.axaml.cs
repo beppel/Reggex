@@ -1,9 +1,11 @@
 using Avalonia.Controls;
 using AvaloniaEdit;
-using Reggex.Desktop.ViewModels;
-using Reggex.Core;
 using AvaloniaEdit.Rendering;
+using System.Collections.Immutable;
 using System.ComponentModel;
+using Reggex.Core;
+using Reggex.Desktop.Snippets;
+using Reggex.Desktop.ViewModels;
 
 namespace Reggex.Desktop.Views;
 
@@ -16,6 +18,11 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        AttachSnippetMenu(this.FindControl<TextBox>("FindPatternEditor"), RegexSnippetCatalog.PatternCategories);
+        AttachSnippetMenu(this.FindControl<TextBox>("ReplacePatternEditor"), RegexSnippetCatalog.PatternCategories);
+        AttachSnippetMenu(this.FindControl<TextBox>("SplitPatternEditor"), RegexSnippetCatalog.PatternCategories);
+        AttachSnippetMenu(this.FindControl<TextBox>("ReplacementEditor"), RegexSnippetCatalog.ReplacementCategories);
+
         DataContextChanged += (_, _) =>
         {
             _sourceEditor = this.FindControl<TextEditor>("SourceEditor");
@@ -32,6 +39,59 @@ public partial class MainWindow : Window
             AttachMatchHighlighter();
             UpdateSourceHighlights();
         };
+    }
+
+    private static void AttachSnippetMenu(
+        TextBox? textBox,
+        ImmutableArray<RegexSnippetCategory> categories)
+    {
+        if (textBox is null)
+        {
+            return;
+        }
+
+        var selectionStart = 0;
+        var selectionEnd = 0;
+        var contextMenu = new ContextMenu();
+        foreach (var category in categories)
+        {
+            var categoryItem = new MenuItem { Header = category.Name };
+            foreach (var snippet in category.Snippets)
+            {
+                var snippetItem = new MenuItem { Header = snippet.Label };
+                if (!string.IsNullOrWhiteSpace(snippet.ToolTip))
+                {
+                    ToolTip.SetTip(snippetItem, snippet.ToolTip);
+                }
+
+                snippetItem.Click += (_, _) =>
+                    InsertSnippet(textBox, selectionStart, selectionEnd, snippet.Text);
+                categoryItem.Items.Add(snippetItem);
+            }
+
+            contextMenu.Items.Add(categoryItem);
+        }
+
+        contextMenu.Opening += (_, _) =>
+        {
+            selectionStart = textBox.SelectionStart;
+            selectionEnd = textBox.SelectionEnd;
+        };
+        textBox.ContextMenu = contextMenu;
+    }
+
+    private static void InsertSnippet(TextBox textBox, int selectionStart, int selectionEnd, string snippet)
+    {
+        var text = textBox.Text ?? string.Empty;
+        var insertion = SnippetTextInsertion.Apply(text, selectionStart, selectionEnd, snippet);
+        textBox.Text = insertion.Text;
+        textBox.Focus();
+        textBox.SelectionStart = insertion.SelectionStart;
+        textBox.SelectionEnd = insertion.SelectionEnd;
+        if (insertion.SelectionLength == 0)
+        {
+            textBox.CaretIndex = insertion.SelectionStart;
+        }
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
