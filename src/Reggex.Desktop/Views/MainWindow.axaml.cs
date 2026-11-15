@@ -26,6 +26,11 @@ public partial class MainWindow : Window
         DataContextChanged += (_, _) =>
         {
             _sourceEditor = this.FindControl<TextEditor>("SourceEditor");
+            if (_sourceEditor is not null)
+            {
+                _sourceEditor.Options.EnableHyperlinks = false;
+                _sourceEditor.Options.EnableEmailHyperlinks = false;
+            }
             if (_subscribedViewModel is not null)
             {
                 _subscribedViewModel.PropertyChanged -= OnViewModelPropertyChanged;
@@ -125,6 +130,8 @@ public partial class MainWindow : Window
             if (_sourceEditor is not null && match.Index >= 0 && match.Index <= _sourceEditor.Document.TextLength)
             {
                 _sourceEditor.TextArea.Caret.Offset = match.Index;
+                var line = _sourceEditor.Document.GetLineByOffset(match.Index);
+                _sourceEditor.ScrollToLine(line.LineNumber);
             }
         }
     }
