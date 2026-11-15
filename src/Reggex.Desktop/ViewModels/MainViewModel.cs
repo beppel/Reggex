@@ -18,6 +18,9 @@ public partial class MainViewModel : ViewModelBase
     private string _testInput = "Try a pattern against this sample text.";
 
     [ObservableProperty]
+    private string _sourceFileStatus = "editable · matches highlighted";
+
+    [ObservableProperty]
     private string _replacement = "<${word}>";
 
     [ObservableProperty]
@@ -46,6 +49,9 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty]
     private bool _ecmaScript;
+
+    [ObservableProperty]
+    private bool _sourceWordWrap = true;
 
     [ObservableProperty]
     private ImmutableArray<RegexMatchResult> _matches = [];

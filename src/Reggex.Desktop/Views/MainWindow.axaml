@@ -95,14 +95,20 @@
                         <Grid RowDefinitions="Auto,*" RowSpacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                                <TextBlock Grid.Column="1" Text="editable · matches highlighted" FontSize="11" Foreground="#77869A" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SourceFileStatus}" FontSize="11" Foreground="#77869A"
+                                               VerticalAlignment="Center" MaxWidth="200" TextTrimming="CharacterEllipsis" />
+                                    <CheckBox Content="Word wrap" IsChecked="{Binding SourceWordWrap}" VerticalAlignment="Center" />
+                                    <Button Content="Load file…" Click="OnLoadSourceFileClick" Padding="8,4"
+                                            Background="#202735" Foreground="#C5D2E3" BorderBrush="#303B4C" />
+                                </StackPanel>
                             </Grid>
                             <Border Grid.Row="1" Background="#111720" BorderBrush="#303B4C" BorderThickness="1"
                                     CornerRadius="5">
                                 <avaloniaEdit:TextEditor x:Name="SourceEditor"
                                                          TextChanged="OnSourceTextChanged"
                                                          FontFamily="Consolas" FontSize="14"
-                                                         ShowLineNumbers="False" WordWrap="True"
+                                                         ShowLineNumbers="False" WordWrap="{Binding SourceWordWrap}"
                                                          Background="#111720" Foreground="#E5EAF1" />
                             </Border>
                         </Grid>
@@ -221,7 +227,11 @@
                         <Grid RowDefinitions="Auto,*" RowSpacing="10">
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                                <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <TextBlock Text="editable" FontSize="11" Foreground="#77869A" VerticalAlignment="Center" />
+                                    <Button Content="Load file…" Click="OnLoadSourceFileClick" Padding="8,4"
+                                            Background="#202735" Foreground="#C5D2E3" BorderBrush="#303B4C" />
+                                </StackPanel>
                             </Grid>
                             <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
                                      AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"
@@ -327,7 +337,11 @@
                             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="SOURCE" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
-                                    <TextBlock Grid.Column="1" Text="editable" FontSize="11" Foreground="#77869A" />
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                        <TextBlock Text="editable" FontSize="11" Foreground="#77869A" VerticalAlignment="Center" />
+                                        <Button Content="Load file…" Click="OnLoadSourceFileClick" Padding="8,4"
+                                                Background="#202735" Foreground="#C5D2E3" BorderBrush="#303B4C" />
+                                    </StackPanel>
                                 </Grid>
                                 <TextBox Grid.Row="1" Text="{Binding TestInput, UpdateSourceTrigger=PropertyChanged}"
                                          AcceptsReturn="True" TextWrapping="Wrap" VerticalContentAlignment="Top"

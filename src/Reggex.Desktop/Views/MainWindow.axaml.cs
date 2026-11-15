@@ -3,9 +3,11 @@ using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using System.Collections.Immutable;
 using System.ComponentModel;
+using System.IO;
 using Reggex.Core;
 using Reggex.Desktop.Snippets;
 using Reggex.Desktop.ViewModels;
+using Avalonia.Platform.Storage;
 
 namespace Reggex.Desktop.Views;
 
@@ -119,6 +121,47 @@ public partial class MainWindow : Window
             !string.Equals(viewModel.TestInput, _sourceEditor.Text, StringComparison.Ordinal))
         {
             viewModel.TestInput = _sourceEditor.Text;
+            viewModel.SourceFileStatus = "edited source text";
+        }
+    }
+
+    private async void OnLoadSourceFileClick(object? sender, Avalonia.Interactivity.RoutedEventArgs args)
+    {
+        if (DataContext is not MainViewModel viewModel)
+        {
+            return;
+        }
+
+        var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Load source text",
+            AllowMultiple = false,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Text files")
+                {
+                    Patterns = ["*.txt", "*.log", "*.csv", "*.json", "*.xml", "*.md"]
+                },
+                FilePickerFileTypes.All
+            ]
+        });
+
+        if (files.Count == 0)
+        {
+            return;
+        }
+
+        var file = files[0];
+        try
+        {
+            await using var stream = await file.OpenReadAsync();
+            using var reader = new StreamReader(stream);
+            viewModel.TestInput = await reader.ReadToEndAsync();
+            viewModel.SourceFileStatus = $"Loaded: {file.Name}";
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            viewModel.SourceFileStatus = $"Could not load file: {exception.Message}";
         }
     }
 
