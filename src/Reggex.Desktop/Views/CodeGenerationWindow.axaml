@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Reggex.Desktop.Views.CodeGenerationWindow"
+        x:Name="CodeWindow"
+        Title="Generate C# code"
+        Width="820" Height="700" MinWidth="620" MinHeight="500"
+        WindowStartupLocation="CenterOwner"
+        RequestedThemeVariant="Dark"
+        Background="#10141B">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" Margin="22" RowSpacing="14">
+        <StackPanel Spacing="4">
+            <TextBlock Text="Generated C#" FontSize="20" FontWeight="Bold" />
+            <TextBlock x:Name="OperationDescription" Foreground="#9BA7B8" />
+        </StackPanel>
+
+        <TextBox x:Name="GeneratedCodeEditor" Grid.Row="1"
+                 AcceptsReturn="True" AcceptsTab="True" TextWrapping="NoWrap"
+                 FontFamily="Consolas" FontSize="14" Padding="14"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+        <Border Grid.Row="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
+                CornerRadius="10" Padding="12">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="18" RowSpacing="8">
+                <CheckBox x:Name="InstanceMethodOption" Content="Instance method"
+                          IsChecked="True" Click="OnOptionChanged" />
+                <CheckBox x:Name="AssumeUsingOption" Grid.Column="1" Content="Assume using directives"
+                          IsChecked="True" Click="OnOptionChanged" />
+                <CheckBox x:Name="VerbatimStringsOption" Grid.Row="1" Content="Verbatim strings (@)"
+                          IsChecked="True" Click="OnOptionChanged" />
+                <CheckBox x:Name="GenerateLoopOption" Grid.Row="1" Grid.Column="1" Content="Generate foreach loop"
+                          IsChecked="True" Click="OnOptionChanged" />
+                <CheckBox x:Name="CopyOnExitOption" Grid.Row="2" Grid.ColumnSpan="2"
+                          Content="Copy code to clipboard on exit" />
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button Content="Close" IsDefault="True" Click="OnCloseClick" Padding="18,8" />
+        </StackPanel>
+    </Grid>
+
+    <Window.Styles>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#111720" />
+            <Setter Property="BorderBrush" Value="#303B4C" />
+            <Setter Property="Foreground" Value="#E5EAF1" />
+            <Setter Property="CaretBrush" Value="#8AB4FF" />
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="#C2CBD8" />
+        </Style>
+    </Window.Styles>
+</Window>

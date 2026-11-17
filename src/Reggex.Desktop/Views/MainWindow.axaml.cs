@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using Reggex.Core;
+using Reggex.Desktop.CodeGeneration;
 using Reggex.Desktop.Snippets;
 using Reggex.Desktop.ViewModels;
 using Avalonia.Platform.Storage;
@@ -163,6 +164,26 @@ public partial class MainWindow : Window
         {
             viewModel.SourceFileStatus = $"Could not load file: {exception.Message}";
         }
+    }
+
+    private async void OnGenerateCodeClick(object? sender, Avalonia.Interactivity.RoutedEventArgs args)
+    {
+        if (DataContext is not MainViewModel viewModel)
+        {
+            return;
+        }
+
+        var sampleKind = viewModel.IsReplaceMode
+            ? RegexCodeSampleKind.Replace
+            : viewModel.IsSplitMode
+                ? RegexCodeSampleKind.Split
+                : RegexCodeSampleKind.Find;
+        var dialog = new CodeGenerationWindow(
+            viewModel.Pattern,
+            viewModel.Replacement,
+            viewModel.CurrentRegexOptions,
+            sampleKind);
+        await dialog.ShowDialog(this);
     }
 
     private void OnMatchPointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs args)

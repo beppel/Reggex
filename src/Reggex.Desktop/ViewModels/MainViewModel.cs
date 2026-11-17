@@ -141,6 +141,8 @@ public partial class MainViewModel : ViewModelBase
         ? "1 segment"
         : $"{SplitSegments.Length} segments";
 
+    public RegexOptions CurrentRegexOptions => GetRegexOptions();
+
     partial void OnPatternChanged(string value) => ScheduleEvaluation();
     partial void OnTestInputChanged(string value) => ScheduleEvaluation();
     partial void OnReplacementChanged(string value) => ScheduleEvaluation();
