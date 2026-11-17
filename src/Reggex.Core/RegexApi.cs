@@ -18,6 +18,9 @@ public sealed record RegexRequest
     /// <summary>The maximum duration allowed for execution.</summary>
     public TimeSpan ExecutionTimeout { get; }
 
+    /// <summary>The maximum number of matches returned by the execution.</summary>
+    public int MaximumResults { get; }
+
     /// <summary>The default execution timeout used when none is provided.</summary>
     public static TimeSpan DefaultExecutionTimeout { get; } = TimeSpan.FromMilliseconds(500);
 
@@ -26,7 +29,8 @@ public sealed record RegexRequest
         string pattern,
         string inputText,
         RegexOptions options = RegexOptions.None,
-        TimeSpan? executionTimeout = null)
+        TimeSpan? executionTimeout = null,
+        int maximumResults = int.MaxValue)
     {
         ArgumentNullException.ThrowIfNull(pattern);
         ArgumentNullException.ThrowIfNull(inputText);
@@ -37,10 +41,16 @@ public sealed record RegexRequest
             throw new ArgumentOutOfRangeException(nameof(executionTimeout), "The execution timeout must be positive.");
         }
 
+        if (maximumResults <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumResults), "The maximum result count must be positive.");
+        }
+
         Pattern = pattern;
         InputText = inputText;
         Options = options;
         ExecutionTimeout = timeout;
+        MaximumResults = maximumResults;
     }
 }
 

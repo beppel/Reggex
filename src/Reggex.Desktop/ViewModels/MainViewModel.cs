@@ -54,6 +54,9 @@ public partial class MainViewModel : ViewModelBase
     private bool _sourceWordWrap = true;
 
     [ObservableProperty]
+    private int _maximumResults = 1000;
+
+    [ObservableProperty]
     private ImmutableArray<RegexMatchResult> _matches = [];
 
     [ObservableProperty]
@@ -149,6 +152,7 @@ public partial class MainViewModel : ViewModelBase
     partial void OnCultureInvariantChanged(bool value) => ScheduleEvaluation();
     partial void OnRightToLeftChanged(bool value) => ScheduleEvaluation();
     partial void OnEcmaScriptChanged(bool value) => ScheduleEvaluation();
+    partial void OnMaximumResultsChanged(int value) => ScheduleEvaluation();
 
     partial void OnSelectedModeIndexChanged(int value)
     {
@@ -204,6 +208,7 @@ public partial class MainViewModel : ViewModelBase
         var input = TestInput;
         var replacement = Replacement;
         var options = GetRegexOptions();
+        var maximumResults = MaximumResults;
         var replaceMode = IsReplaceMode;
         var splitMode = IsSplitMode;
 
@@ -213,7 +218,7 @@ public partial class MainViewModel : ViewModelBase
         ErrorMessage = string.Empty;
         ErrorPosition = string.Empty;
 
-        _ = EvaluateAfterDelayAsync(pattern, input, replacement, options, replaceMode, splitMode, version, token);
+        _ = EvaluateAfterDelayAsync(pattern, input, replacement, options, maximumResults, replaceMode, splitMode, version, token);
     }
 
     private async Task EvaluateAfterDelayAsync(
@@ -221,6 +226,7 @@ public partial class MainViewModel : ViewModelBase
         string input,
         string replacement,
         RegexOptions options,
+        int maximumResults,
         bool replaceMode,
         bool splitMode,
         int version,
@@ -230,7 +236,7 @@ public partial class MainViewModel : ViewModelBase
         {
             await Task.Delay(TimeSpan.FromMilliseconds(180), cancellationToken);
 
-            var request = new RegexRequest(pattern, input, options);
+            var request = new RegexRequest(pattern, input, options, maximumResults: maximumResults);
             var evaluation = await Task.Run(() => Evaluate(request, replacement, replaceMode, splitMode), cancellationToken);
 
             if (cancellationToken.IsCancellationRequested || version != _evaluationVersion)

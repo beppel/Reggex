@@ -123,6 +123,10 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <TextBlock Text="MATCHES" FontSize="11" FontWeight="Bold" Foreground="#9BA7B8" />
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="Max" Foreground="#93A1B5" VerticalAlignment="Center" />
+                                    <NumericUpDown Value="{Binding MaximumResults}"
+                                                   Minimum="1" Maximum="1000000" Increment="100"
+                                                   FormatString="0" Width="120" VerticalAlignment="Center" />
                                     <TextBlock Text="Evaluating…" Foreground="#93A6BE" IsVisible="{Binding IsEvaluating}" />
                                     <TextBlock Text="{Binding MatchCountText}" Foreground="#A9C8FF" />
                                 </StackPanel>

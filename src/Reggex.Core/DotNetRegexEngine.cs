@@ -25,6 +25,7 @@ public sealed class DotNetRegexEngine : IRegexEngine
             var groupNames = regex.GetGroupNames();
             var matches = regex.Matches(request.InputText)
                 .Cast<Match>()
+                .Take(request.MaximumResults)
                 .Select(match => new RegexMatchResult(
                     match.Value,
                     match.Index,
