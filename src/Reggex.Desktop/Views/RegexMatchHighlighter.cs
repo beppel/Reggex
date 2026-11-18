@@ -14,6 +14,8 @@ public sealed class RegexMatchHighlighter : DocumentColorizingTransformer, IBack
 
     private ImmutableArray<RegexMatchResult> _matches = [];
     private RegexMatchResult? _selectedMatch;
+    private bool _matchesAreOrderedByIndex = true;
+    private bool _matchesInAscendingOrder = true;
 
     public void SetMatches(ImmutableArray<RegexMatchResult> matches, int selectedMatchIndex)
     {
@@ -21,6 +23,29 @@ public sealed class RegexMatchHighlighter : DocumentColorizingTransformer, IBack
         _selectedMatch = selectedMatchIndex >= 0 && selectedMatchIndex < matches.Length
             ? matches[selectedMatchIndex]
             : null;
+
+        var ascending = true;
+        var descending = true;
+        for (var i = 1; i < matches.Length; i++)
+        {
+            var previous = matches[i - 1];
+            var current = matches[i];
+            var previousEnd = (long)previous.Index + previous.Length;
+            var currentEnd = (long)current.Index + current.Length;
+
+            if (previous.Index > current.Index || previousEnd > currentEnd)
+            {
+                ascending = false;
+            }
+
+            if (previous.Index < current.Index || previousEnd < currentEnd)
+            {
+                descending = false;
+            }
+        }
+
+        _matchesAreOrderedByIndex = ascending || descending;
+        _matchesInAscendingOrder = ascending;
     }
 
     public KnownLayer Layer => KnownLayer.Background;
@@ -48,16 +73,65 @@ public sealed class RegexMatchHighlighter : DocumentColorizingTransformer, IBack
         var lineStart = line.Offset;
         var lineEnd = line.Offset + line.Length;
 
-        foreach (var match in _matches)
+        if (_matchesAreOrderedByIndex)
         {
-            if (match.Length == 0) continue;
-            ApplyRange(match.Index, match.Index + match.Length, lineStart, lineEnd, MatchBrush);
+            var firstMatch = FindFirstMatchForLine(lineStart, lineEnd);
+            for (var i = firstMatch; i < _matches.Length; i++)
+            {
+                var match = _matches[i];
+                if (_matchesInAscendingOrder
+                    ? match.Index >= lineEnd
+                    : (long)match.Index + match.Length <= lineStart)
+                {
+                    break;
+                }
+
+                if (match.Length > 0)
+                {
+                    ApplyRange(match.Index, match.Index + match.Length, lineStart, lineEnd, MatchBrush);
+                }
+            }
+        }
+        else
+        {
+            foreach (var match in _matches)
+            {
+                if (match.Length > 0)
+                {
+                    ApplyRange(match.Index, match.Index + match.Length, lineStart, lineEnd, MatchBrush);
+                }
+            }
         }
 
         if (_selectedMatch is { Length: > 0 } selected)
         {
             ApplyRange(selected.Index, selected.Index + selected.Length, lineStart, lineEnd, SelectedMatchBrush);
         }
+    }
+
+    private int FindFirstMatchForLine(int lineStart, int lineEnd)
+    {
+        var low = 0;
+        var high = _matches.Length;
+        while (low < high)
+        {
+            var middle = low + (high - low) / 2;
+            var match = _matches[middle];
+            var isBeforeLine = _matchesInAscendingOrder
+                ? (long)match.Index + match.Length <= lineStart
+                : match.Index >= lineEnd;
+
+            if (isBeforeLine)
+            {
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle;
+            }
+        }
+
+        return low;
     }
 
     private void ApplyRange(int start, int end, int lineStart, int lineEnd, IBrush brush)
