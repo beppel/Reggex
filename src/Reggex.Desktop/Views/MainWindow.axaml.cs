@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using Reggex.Core;
 using Reggex.Desktop.CodeGeneration;
+using Reggex.Desktop.IO;
 using Reggex.Desktop.Snippets;
 using Reggex.Desktop.ViewModels;
 using Avalonia.Platform.Storage;
@@ -155,10 +156,29 @@ public partial class MainWindow : Window
         var file = files[0];
         try
         {
+            long? fileSize = null;
+            try
+            {
+                var properties = await file.GetBasicPropertiesAsync();
+                if (properties.Size.HasValue)
+                {
+                    fileSize = (long)properties.Size.Value;
+                }
+            }
+            catch
+            {
+                // Basic properties may not be supported on all storage providers
+            }
+
             await using var stream = await file.OpenReadAsync();
-            using var reader = new StreamReader(stream);
-            viewModel.TestInput = await reader.ReadToEndAsync();
-            viewModel.SourceFileStatus = $"Loaded: {file.Name}";
+            var result = await SourceTextLoader.LoadFromStreamAsync(stream, file.Name, fileSize);
+
+            if (result.IsSuccess && result.Content is not null)
+            {
+                viewModel.TestInput = result.Content;
+            }
+
+            viewModel.SourceFileStatus = result.StatusMessage;
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
