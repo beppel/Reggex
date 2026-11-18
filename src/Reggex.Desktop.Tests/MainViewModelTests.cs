@@ -102,6 +102,23 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public async Task MainViewModelSupportsNonBacktrackingOption()
+    {
+        using var viewModel = new MainViewModel(_engine)
+        {
+            Pattern = @"\d+",
+            TestInput = "12 34",
+            NonBacktracking = true
+        };
+
+        await Task.Delay(300);
+
+        Assert.True(viewModel.CurrentRegexOptions.HasFlag(System.Text.RegularExpressions.RegexOptions.NonBacktracking));
+        Assert.False(viewModel.HasError);
+        Assert.Equal(2, viewModel.MatchCount);
+    }
+
+    [Fact]
     public void MainViewModelDisposesSafely()
     {
         var viewModel = new MainViewModel(_engine);

@@ -48,6 +48,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private bool _rightToLeft;
 
     [ObservableProperty]
+    private bool _nonBacktracking;
+
+    [ObservableProperty]
     private bool _sourceWordWrap = true;
 
     [ObservableProperty]
@@ -160,6 +163,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     partial void OnIgnorePatternWhitespaceChanged(bool value) => ScheduleEvaluation();
     partial void OnCultureInvariantChanged(bool value) => ScheduleEvaluation();
     partial void OnRightToLeftChanged(bool value) => ScheduleEvaluation();
+    partial void OnNonBacktrackingChanged(bool value) => ScheduleEvaluation();
     partial void OnMaximumResultsChanged(int value) => ScheduleEvaluation();
 
     partial void OnSelectedModeIndexChanged(int value)
@@ -336,6 +340,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         if (IgnorePatternWhitespace) options |= RegexOptions.IgnorePatternWhitespace;
         if (CultureInvariant) options |= RegexOptions.CultureInvariant;
         if (RightToLeft) options |= RegexOptions.RightToLeft;
+        if (NonBacktracking) options |= RegexOptions.NonBacktracking;
         return options;
     }
 

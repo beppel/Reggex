@@ -131,6 +131,7 @@ public static class RegexCodeGenerator
         AddIfSet(RegexOptions.IgnorePatternWhitespace, "IgnorePatternWhitespace");
         AddIfSet(RegexOptions.RightToLeft, "RightToLeft");
         AddIfSet(RegexOptions.CultureInvariant, "CultureInvariant");
+        AddIfSet(RegexOptions.NonBacktracking, "NonBacktracking");
 
         return names.Count == 0
             ? $"{type}.None"
