@@ -54,6 +54,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private bool _sourceWordWrap = true;
 
     [ObservableProperty]
+    private bool _showInvisibleCharacters;
+
+    [ObservableProperty]
     private int _maximumResults = 1000;
 
     [ObservableProperty]
