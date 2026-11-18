@@ -101,6 +101,24 @@ public class MainViewModelTests
     }
 
     [Fact]
+    public async Task MainViewModelUpdatesMatchCountTextWhenTruncated()
+    {
+        using var viewModel = new MainViewModel(_engine)
+        {
+            Pattern = @"\w+",
+            TestInput = "one two three four five",
+            MaximumResults = 3
+        };
+
+        await Task.Delay(300);
+
+        Assert.False(viewModel.IsEvaluating);
+        Assert.Equal(3, viewModel.MatchCount);
+        Assert.True(viewModel.IsTruncated);
+        Assert.Equal("3 matches (limit reached)", viewModel.MatchCountText);
+    }
+
+    [Fact]
     public void MainViewModelDisposesSafely()
     {
         var viewModel = new MainViewModel(_engine);

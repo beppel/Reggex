@@ -31,9 +31,15 @@ public sealed class DotNetRegexEngine : IRegexEngine
         try
         {
             var groupNames = regex.GetGroupNames();
-            var matches = regex.Matches(request.InputText)
+            var rawMatches = regex.Matches(request.InputText)
                 .Cast<Match>()
-                .Take(request.MaximumResults)
+                .Take(request.MaximumResults == int.MaxValue ? int.MaxValue : request.MaximumResults + 1)
+                .ToList();
+
+            var isTruncated = rawMatches.Count > request.MaximumResults;
+            var matchesToConvert = isTruncated ? rawMatches.Take(request.MaximumResults) : rawMatches;
+
+            var matches = matchesToConvert
                 .Select(match => new RegexMatchResult(
                     match.Value,
                     match.Index,
@@ -41,7 +47,7 @@ public sealed class DotNetRegexEngine : IRegexEngine
                     groupNames.Select(name => ConvertGroup(match.Groups[name], name))))
                 .ToArray();
 
-            return RegexExecutionResult.Succeeded(matches);
+            return RegexExecutionResult.Succeeded(matches, isTruncated);
         }
         catch (RegexMatchTimeoutException exception)
         {

@@ -229,6 +229,31 @@ public class DotNetRegexEngineTests
         Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
     }
 
+    [Fact]
+    public void ExecuteRespectsMaximumResultsAndFlagsTruncation()
+    {
+        var request = new RegexRequest(@"\w+", "one two three four five", maximumResults: 3);
+        var result = _engine.Execute(request);
+
+        Assert.Equal(RegexExecutionStatus.Success, result.Status);
+        Assert.True(result.IsTruncated);
+        Assert.Equal(3, result.Matches.Length);
+        AssertMatch(result.Matches[0], "one", 0, 3);
+        AssertMatch(result.Matches[1], "two", 4, 3);
+        AssertMatch(result.Matches[2], "three", 8, 5);
+    }
+
+    [Fact]
+    public void ExecuteDoesNotFlagTruncationWhenMatchesWithinLimit()
+    {
+        var request = new RegexRequest(@"\w+", "one two three", maximumResults: 3);
+        var result = _engine.Execute(request);
+
+        Assert.Equal(RegexExecutionStatus.Success, result.Status);
+        Assert.False(result.IsTruncated);
+        Assert.Equal(3, result.Matches.Length);
+    }
+
     private RegexExecutionResult Execute(
         string pattern,
         string input,

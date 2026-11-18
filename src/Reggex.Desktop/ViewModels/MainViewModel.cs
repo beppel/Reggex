@@ -60,6 +60,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     private ImmutableArray<RegexMatchResult> _matches = [];
 
     [ObservableProperty]
+    private bool _isTruncated;
+
+    [ObservableProperty]
     private int _selectedMatchIndex = -1;
 
     [ObservableProperty]
@@ -135,7 +138,14 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public bool HasErrorPosition => !string.IsNullOrEmpty(ErrorPosition);
 
-    public string MatchCountText => MatchCount == 1 ? "1 match" : $"{MatchCount} matches";
+    public string MatchCountText
+    {
+        get
+        {
+            var countText = MatchCount == 1 ? "1 match" : $"{MatchCount} matches";
+            return IsTruncated ? $"{countText} (limit reached)" : countText;
+        }
+    }
 
     public string SplitSegmentCountText => SplitSegments.Length == 1
         ? "1 segment"
@@ -197,6 +207,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     partial void OnErrorPositionChanged(string value) => OnPropertyChanged(nameof(HasErrorPosition));
 
+    partial void OnIsTruncatedChanged(bool value) => OnPropertyChanged(nameof(MatchCountText));
+
     private void ScheduleEvaluation()
     {
         _evaluationCancellation?.Cancel();
@@ -215,6 +227,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
         IsEvaluating = true;
         SelectedMatchIndex = -1;
+        IsTruncated = false;
         HasError = false;
         ErrorMessage = string.Empty;
         ErrorPosition = string.Empty;
@@ -246,6 +259,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             }
 
             Matches = evaluation.Result.Matches;
+            IsTruncated = evaluation.Result.IsTruncated;
             ReplacementOutput = evaluation.ReplacementOutput;
             SplitSegments = evaluation.SplitSegments
                 .Select((segment, index) => new SplitSegmentViewModel(index, segment))
@@ -269,6 +283,7 @@ public partial class MainViewModel : ViewModelBase, IDisposable
             }
 
             Matches = [];
+            IsTruncated = false;
             ReplacementOutput = string.Empty;
             SplitSegments = [];
             HasError = true;

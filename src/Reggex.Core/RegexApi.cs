@@ -111,21 +111,26 @@ public sealed record RegexExecutionResult
     /// <summary>Structured error details for a failed execution; otherwise null.</summary>
     public RegexExecutionError? Error { get; }
 
+    /// <summary>Whether the matches were truncated because they exceeded the requested limit.</summary>
+    public bool IsTruncated { get; }
+
     private RegexExecutionResult(
         RegexExecutionStatus status,
         ImmutableArray<RegexMatchResult> matches,
-        RegexExecutionError? error)
+        RegexExecutionError? error,
+        bool isTruncated = false)
     {
         Status = status;
         Matches = matches;
         Error = error;
+        IsTruncated = isTruncated;
     }
 
     /// <summary>Creates a successful result from the matches returned by an engine.</summary>
-    public static RegexExecutionResult Succeeded(IEnumerable<RegexMatchResult> matches)
+    public static RegexExecutionResult Succeeded(IEnumerable<RegexMatchResult> matches, bool isTruncated = false)
     {
         ArgumentNullException.ThrowIfNull(matches);
-        return new RegexExecutionResult(RegexExecutionStatus.Success, matches.ToImmutableArray(), null);
+        return new RegexExecutionResult(RegexExecutionStatus.Success, matches.ToImmutableArray(), null, isTruncated);
     }
 
     /// <summary>Creates a result for a pattern rejected by the engine.</summary>

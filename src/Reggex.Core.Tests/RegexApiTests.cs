@@ -52,6 +52,10 @@ public class RegexApiTests
         Assert.Equal(RegexExecutionStatus.Success, success.Status);
         Assert.Single(success.Matches);
         Assert.Null(success.Error);
+        Assert.False(success.IsTruncated);
+
+        var truncated = RegexExecutionResult.Succeeded([match], isTruncated: true);
+        Assert.True(truncated.IsTruncated);
 
         Assert.Equal(RegexExecutionStatus.InvalidPattern, invalidPattern.Status);
         Assert.Empty(invalidPattern.Matches);
