@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using AvaloniaEdit;
 using AvaloniaEdit.Rendering;
 using System.Collections.Immutable;
@@ -22,6 +24,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        AddHandler(KeyDownEvent, OnWindowKeyDown, RoutingStrategies.Tunnel);
         AttachSnippetMenu(this.FindControl<TextBox>("PatternEditor"), RegexSnippetCatalog.PatternCategories);
         AttachSnippetMenu(this.FindControl<TextBox>("ReplacementEditor"), RegexSnippetCatalog.ReplacementCategories);
 
@@ -47,6 +50,62 @@ public partial class MainWindow : Window
             AttachMatchHighlighter();
             UpdateSourceHighlights();
         };
+    }
+
+    private async void OnWindowKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (args.KeyModifiers == KeyModifiers.Control)
+        {
+            switch (args.Key)
+            {
+                case Key.O:
+                    args.Handled = true;
+                    await LoadSourceFileAsync();
+                    return;
+                case Key.G:
+                    args.Handled = true;
+                    await ShowCodeGenerationWindowAsync();
+                    return;
+                case Key.D1:
+                case Key.NumPad1:
+                    if (DataContext is MainViewModel findViewModel)
+                    {
+                        findViewModel.IsFindMode = true;
+                    }
+                    args.Handled = true;
+                    return;
+                case Key.D2:
+                case Key.NumPad2:
+                    if (DataContext is MainViewModel replaceViewModel)
+                    {
+                        replaceViewModel.IsReplaceMode = true;
+                    }
+                    args.Handled = true;
+                    return;
+                case Key.D3:
+                case Key.NumPad3:
+                    if (DataContext is MainViewModel splitViewModel)
+                    {
+                        splitViewModel.IsSplitMode = true;
+                    }
+                    args.Handled = true;
+                    return;
+                case Key.Enter:
+                    if (DataContext is MainViewModel viewModel)
+                    {
+                        viewModel.EvaluateNow();
+                    }
+                    args.Handled = true;
+                    return;
+            }
+        }
+
+        if (args.Key == Key.F5 && args.KeyModifiers == KeyModifiers.None &&
+            DataContext is MainViewModel reevaluationViewModel)
+        {
+            reevaluationViewModel.EvaluateNow();
+            args.Handled = true;
+        }
     }
 
     private static void AttachSnippetMenu(
@@ -143,7 +202,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void OnLoadSourceFileClick(object? sender, Avalonia.Interactivity.RoutedEventArgs args)
+    private async void OnLoadSourceFileClick(object? sender, RoutedEventArgs args)
+        => await LoadSourceFileAsync();
+
+    private async Task LoadSourceFileAsync()
     {
         if (DataContext is not MainViewModel viewModel)
         {
@@ -202,7 +264,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void OnGenerateCodeClick(object? sender, Avalonia.Interactivity.RoutedEventArgs args)
+    private async void OnGenerateCodeClick(object? sender, RoutedEventArgs args)
+        => await ShowCodeGenerationWindowAsync();
+
+    private async Task ShowCodeGenerationWindowAsync()
     {
         if (DataContext is not MainViewModel viewModel)
         {

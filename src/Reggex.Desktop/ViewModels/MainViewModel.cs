@@ -153,6 +153,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
 
     public RegexOptions CurrentRegexOptions => GetRegexOptions();
 
+    public void EvaluateNow() => ScheduleEvaluation(TimeSpan.Zero);
+
     partial void OnPatternChanged(string value) => ScheduleEvaluation();
     partial void OnTestInputChanged(string value) => ScheduleEvaluation();
     partial void OnReplacementChanged(string value) => ScheduleEvaluation();
@@ -210,6 +212,9 @@ public partial class MainViewModel : ViewModelBase, IDisposable
     partial void OnIsTruncatedChanged(bool value) => OnPropertyChanged(nameof(MatchCountText));
 
     private void ScheduleEvaluation()
+        => ScheduleEvaluation(TimeSpan.FromMilliseconds(180));
+
+    private void ScheduleEvaluation(TimeSpan delay)
     {
         _evaluationCancellation?.Cancel();
 
@@ -232,7 +237,8 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         ErrorMessage = string.Empty;
         ErrorPosition = string.Empty;
 
-        _ = EvaluateAfterDelayAsync(pattern, input, replacement, options, maximumResults, replaceMode, splitMode, version, token);
+        _ = EvaluateAfterDelayAsync(
+            pattern, input, replacement, options, maximumResults, replaceMode, splitMode, delay, version, token);
     }
 
     private async Task EvaluateAfterDelayAsync(
@@ -243,12 +249,13 @@ public partial class MainViewModel : ViewModelBase, IDisposable
         int maximumResults,
         bool replaceMode,
         bool splitMode,
+        TimeSpan delay,
         int version,
         CancellationToken cancellationToken)
     {
         try
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(180), cancellationToken);
+            await Task.Delay(delay, cancellationToken);
 
             var request = new RegexRequest(pattern, input, options, maximumResults: maximumResults);
             var evaluation = await Task.Run(() => Evaluate(request, replacement, replaceMode, splitMode), cancellationToken);

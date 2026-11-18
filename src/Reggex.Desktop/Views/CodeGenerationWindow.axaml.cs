@@ -18,6 +18,7 @@ public partial class CodeGenerationWindow : Window
     public CodeGenerationWindow()
     {
         InitializeComponent();
+        AddHandler(KeyDownEvent, OnDialogKeyDown, RoutingStrategies.Tunnel);
         Closing += OnClosing;
     }
 
@@ -69,6 +70,15 @@ public partial class CodeGenerationWindow : Window
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs args) => Close();
+
+    private void OnDialogKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (args.Key == Key.Escape && args.KeyModifiers == KeyModifiers.None)
+        {
+            args.Handled = true;
+            Close();
+        }
+    }
 
     private async void OnClosing(object? sender, WindowClosingEventArgs args)
     {
