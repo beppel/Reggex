@@ -135,9 +135,16 @@
                             <Grid Grid.Row="1">
                                 <TextBlock Text="No matches found" Foreground="#77869A" VerticalAlignment="Center"
                                            HorizontalAlignment="Center" IsVisible="{Binding HasNoMatches}" />
-                                <ScrollViewer IsVisible="{Binding HasMatches}">
-                                    <ItemsControl ItemsSource="{Binding Matches}">
-                                        <ItemsControl.ItemTemplate>
+                                <ListBox ItemsSource="{Binding Matches}" IsVisible="{Binding HasMatches}"
+                                         Classes="virtualized-list"                                         
+                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <Border Background="#202735" CornerRadius="8" Padding="10" Margin="0,0,0,8"
                                                         Cursor="Hand" PointerPressed="OnMatchPointerPressed">
@@ -175,9 +182,8 @@
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
                             </Grid>
                         </Grid>
                     </Border>
@@ -373,9 +379,16 @@
                                 <Grid Grid.Row="1">
                                     <TextBlock Text="No segments" Foreground="#77869A" VerticalAlignment="Center"
                                                HorizontalAlignment="Center" IsVisible="{Binding HasNoSplitSegments}" />
-                                    <ScrollViewer IsVisible="{Binding HasSplitSegments}">
-                                        <ItemsControl ItemsSource="{Binding SplitSegments}">
-                                            <ItemsControl.ItemTemplate>
+                                    <ListBox ItemsSource="{Binding SplitSegments}" IsVisible="{Binding HasSplitSegments}"
+                                             Classes="virtualized-list"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <VirtualizingStackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border Background="#202735" CornerRadius="8" Padding="10"
                                                             Margin="0,0,0,8">
@@ -386,9 +399,8 @@
                                                         </StackPanel>
                                                     </Border>
                                                 </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </ScrollViewer>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
                                 </Grid>
                             </Grid>
                         </Border>
@@ -412,6 +424,26 @@
         </Style>
         <Style Selector="GridSplitter">
             <Setter Property="Background" Value="#293343" />
+        </Style>
+        <Style Selector="ListBox.virtualized-list">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.virtualized-list ListBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="ListBox.virtualized-list ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.virtualized-list ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.virtualized-list ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
         </Style>
     </Window.Styles>
 
