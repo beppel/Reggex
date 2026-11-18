@@ -64,23 +64,6 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public async Task MainViewModelReportsIncompatibleOptions()
-    {
-        using var viewModel = new MainViewModel(_engine)
-        {
-            Pattern = "abc",
-            EcmaScript = true,
-            ExplicitCapture = true
-        };
-
-        await Task.Delay(300);
-
-        Assert.False(viewModel.IsEvaluating);
-        Assert.True(viewModel.HasError);
-        Assert.Contains("The selected regex options are not supported together", viewModel.ErrorMessage);
-    }
-
-    [Fact]
     public async Task MainViewModelUpdatesModeProperties()
     {
         using var viewModel = new MainViewModel(_engine);

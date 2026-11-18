@@ -7,7 +7,7 @@ Reggex is a desktop application for building and testing .NET regular expression
 - **Find** evaluates a pattern against editable sample text and lists all matches with their positions, lengths, and captured groups.
 - **Match highlighting** marks all matches directly in the editable source text. Select a match to emphasize it and move the editor to its position; zero-length matches are shown with position markers.
 - **Replace** previews the result using .NET replacement syntax, including named groups.
-- **Regex options** include Ignore case, Multiline, Singleline, Explicit capture, Ignore pattern whitespace, Right to left, and ECMAScript.
+- **Regex options** include Ignore case, Multiline, Singleline, Explicit capture, Ignore pattern whitespace, Culture invariant, and Right to left.
 - **Immediate feedback** updates as you edit, reports invalid patterns, and limits regex execution to 500 ms.
 
 Reggex uses .NET's `System.Text.RegularExpressions` engine. Pattern syntax and behavior follow .NET regular expressions.

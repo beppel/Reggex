@@ -130,7 +130,6 @@ public static class RegexCodeGenerator
         AddIfSet(RegexOptions.Singleline, "Singleline");
         AddIfSet(RegexOptions.IgnorePatternWhitespace, "IgnorePatternWhitespace");
         AddIfSet(RegexOptions.RightToLeft, "RightToLeft");
-        AddIfSet(RegexOptions.ECMAScript, "ECMAScript");
         AddIfSet(RegexOptions.CultureInvariant, "CultureInvariant");
 
         return names.Count == 0
