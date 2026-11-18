@@ -111,9 +111,14 @@ public class MainViewModelTests
             NonBacktracking = true
         };
 
-        await Task.Delay(300);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        while (viewModel.IsEvaluating)
+        {
+            await Task.Delay(10, timeout.Token);
+        }
 
         Assert.True(viewModel.CurrentRegexOptions.HasFlag(System.Text.RegularExpressions.RegexOptions.NonBacktracking));
+        Assert.False(viewModel.IsEvaluating);
         Assert.False(viewModel.HasError);
         Assert.Equal(2, viewModel.MatchCount);
     }

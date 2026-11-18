@@ -169,6 +169,46 @@
                                                                                Foreground="#E5EAF1"
                                                                                FontFamily="Consolas" FontSize="10" />
                                                                 </StackPanel>
+                                                                <ToolTip.Tip>
+                                                                    <Border Background="#171D27" BorderBrush="#39475B"
+                                                                            BorderThickness="1" CornerRadius="6"
+                                                                            Padding="10">
+                                                                        <StackPanel MaxWidth="420" Spacing="6">
+                                                                            <TextBlock Text="{Binding Name, StringFormat='Group {0}'}"
+                                                                                       Foreground="#A9C8FF"
+                                                                                       FontWeight="Bold" />
+                                                                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                                                                <TextBlock Text="{Binding Index, StringFormat='Index {0}'}"
+                                                                                           Foreground="#C2CBD8" />
+                                                                                <TextBlock Text="{Binding Length, StringFormat='Length {0}'}"
+                                                                                           Foreground="#C2CBD8" />
+                                                                            </StackPanel>
+                                                                            <TextBlock Text="{Binding Captures.Length, StringFormat='Captures ({0})'}"
+                                                                                       Foreground="#9BA7B8" />
+                                                                            <ItemsControl ItemsSource="{Binding Captures}">
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate>
+                                                                                        <Grid ColumnDefinitions="Auto,Auto,*"
+                                                                                              ColumnSpacing="10">
+                                                                                            <TextBlock Text="{Binding Index, StringFormat='Index {0}'}"
+                                                                                                       Foreground="#93A1B5"
+                                                                                                       FontSize="11" />
+                                                                                            <TextBlock Grid.Column="1"
+                                                                                                       Text="{Binding Length, StringFormat='Length {0}'}"
+                                                                                                       Foreground="#93A1B5"
+                                                                                                       FontSize="11" />
+                                                                                            <TextBlock Grid.Column="2"
+                                                                                                       Text="{Binding Value}"
+                                                                                                       Foreground="#E5EAF1"
+                                                                                                       FontFamily="Consolas"
+                                                                                                       TextWrapping="Wrap" />
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                </ToolTip.Tip>
                                                             </Border>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
