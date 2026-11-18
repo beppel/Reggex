@@ -22,9 +22,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AttachSnippetMenu(this.FindControl<TextBox>("FindPatternEditor"), RegexSnippetCatalog.PatternCategories);
-        AttachSnippetMenu(this.FindControl<TextBox>("ReplacePatternEditor"), RegexSnippetCatalog.PatternCategories);
-        AttachSnippetMenu(this.FindControl<TextBox>("SplitPatternEditor"), RegexSnippetCatalog.PatternCategories);
+        AttachSnippetMenu(this.FindControl<TextBox>("PatternEditor"), RegexSnippetCatalog.PatternCategories);
         AttachSnippetMenu(this.FindControl<TextBox>("ReplacementEditor"), RegexSnippetCatalog.ReplacementCategories);
 
         DataContextChanged += (_, _) =>
@@ -44,6 +42,7 @@ public partial class MainWindow : Window
             {
                 _subscribedViewModel.PropertyChanged += OnViewModelPropertyChanged;
                 UpdateSourceEditorText();
+                UpdateResultsColumnWidths();
             }
             AttachMatchHighlighter();
             UpdateSourceHighlights();
@@ -105,7 +104,11 @@ public partial class MainWindow : Window
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(MainViewModel.TestInput))
+        if (args.PropertyName == nameof(MainViewModel.SelectedModeIndex))
+        {
+            UpdateResultsColumnWidths();
+        }
+        else if (args.PropertyName == nameof(MainViewModel.TestInput))
         {
             UpdateSourceEditorText();
         }
@@ -115,6 +118,19 @@ public partial class MainWindow : Window
         {
             UpdateSourceHighlights();
         }
+    }
+
+    private void UpdateResultsColumnWidths()
+    {
+        if (_subscribedViewModel is null)
+        {
+            return;
+        }
+
+        ResultsLayout.ColumnDefinitions[0].Width = new GridLength(
+            _subscribedViewModel.IsFindMode ? 2 : 1,
+            GridUnitType.Star);
+        ResultsLayout.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
     }
 
     private void OnSourceTextChanged(object? sender, EventArgs args)
