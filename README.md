@@ -4,10 +4,12 @@ Reggex is a desktop application for building and testing .NET regular expression
 
 ## Features
 
-- **Find** evaluates a pattern against editable sample text and lists all matches with their positions, lengths, and captured groups.
-- **Match highlighting** marks all matches directly in the editable source text. Select a match to emphasize it and move the editor to its position; zero-length matches are shown with position markers.
-- **Replace** previews the result using .NET replacement syntax, including named groups.
-- **Regex options** include Ignore case, Multiline, Singleline, Explicit capture, Ignore pattern whitespace, Culture invariant, and Right to left.
+- **Find, Replace, and Split** evaluate patterns against editable sample text, preview replacements, and inspect split segments.
+- **Match details and highlighting** show match/group positions, lengths, and repeated captures. Select a match to emphasize it and move the source editor to its position; zero-length matches have position markers.
+- **Regex options** include Ignore case, Multiline, Singleline, Explicit capture, Ignore pattern whitespace, Culture invariant, Right to left, and Non-backtracking.
+- **Invisible characters** can be shown with visible markers for spaces, tabs, line endings, and control characters.
+- **C# code generation** supports instance/static examples and `[GeneratedRegex]`.
+- **Keyboard shortcuts**: `Ctrl+O` loads a source file, `Ctrl+G` opens code generation, `Ctrl+1/2/3` switches modes, and `Ctrl+Enter` or `F5` reevaluates.
 - **Immediate feedback** updates as you edit, reports invalid patterns, and limits regex execution to 500 ms.
 
 Reggex uses .NET's `System.Text.RegularExpressions` engine. Pattern syntax and behavior follow .NET regular expressions.
@@ -26,17 +28,19 @@ dotnet run --project src/Reggex.Desktop
 
 ## Test
 
-Run the Core test suite with:
+Run both test suites with:
 
 ```sh
 dotnet test src/Reggex.Core.Tests
+dotnet test src/Reggex.Desktop.Tests
 ```
 
 ## Project structure
 
 - `src/Reggex.Core` contains the regex engine, request and result models, and execution behavior. It has no UI dependency.
 - `src/Reggex.Desktop` contains the Avalonia desktop interface and its MVVM presentation logic.
-- `src/Reggex.Core.Tests` contains unit tests for the Core behavior.
+- `src/Reggex.Core.Tests` contains unit tests for Core behavior.
+- `src/Reggex.Desktop.Tests` contains tests for desktop presentation logic and code generation.
 - `documentation` contains the architecture notes and project roadmap.
 
-The UI is built with Avalonia and CommunityToolkit.Mvvm. The project is designed for cross-platform desktop use; platform packaging and validation are still part of the roadmap.
+The UI is built with Avalonia and CommunityToolkit.Mvvm. Cross-platform runtime validation and release packaging are still in progress; see [the roadmap](documentation/roadmap.md) before treating published artifacts as supported releases.
