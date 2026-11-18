@@ -21,7 +21,7 @@
 
         <Border Grid.Row="2" Background="#171D27" BorderBrush="#293343" BorderThickness="1"
                 CornerRadius="10" Padding="12">
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="18" RowSpacing="8">
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="18" RowSpacing="8">
                 <CheckBox x:Name="InstanceMethodOption" Content="Instance method"
                           IsChecked="True" Click="OnOptionChanged" />
                 <CheckBox x:Name="AssumeUsingOption" Grid.Column="1" Content="Assume using directives"
@@ -30,7 +30,9 @@
                           IsChecked="True" Click="OnOptionChanged" />
                 <CheckBox x:Name="GenerateLoopOption" Grid.Row="1" Grid.Column="1" Content="Generate foreach loop"
                           IsChecked="True" Click="OnOptionChanged" />
-                <CheckBox x:Name="CopyOnExitOption" Grid.Row="2" Grid.ColumnSpan="2"
+                <CheckBox x:Name="GeneratedRegexOption" Grid.Row="2" Content="Use [GeneratedRegex]"
+                          Click="OnOptionChanged" />
+                <CheckBox x:Name="CopyOnExitOption" Grid.Row="3" Grid.ColumnSpan="2"
                           Content="Copy code to clipboard on exit" />
             </Grid>
         </Border>

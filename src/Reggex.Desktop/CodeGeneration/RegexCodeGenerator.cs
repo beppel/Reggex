@@ -19,7 +19,8 @@ public sealed record RegexCodeGenerationOptions(
     bool UseInstanceMethod,
     bool AssumeUsingDirectives,
     bool UseVerbatimStrings,
-    bool GenerateLoop);
+    bool GenerateLoop,
+    bool UseGeneratedRegex = false);
 
 public static class RegexCodeGenerator
 {
@@ -35,6 +36,12 @@ public static class RegexCodeGenerator
         var input = FormatString("text", verbatim: false);
         var replacement = FormatString(options.Replacement, verbatim: false);
         var builder = new StringBuilder();
+
+        if (options.UseGeneratedRegex)
+        {
+            AppendGeneratedRegex(builder, options, regexType, pattern, input, replacement, regexOptions);
+            return builder.ToString().TrimEnd();
+        }
 
         switch (options.SampleKind)
         {
@@ -52,6 +59,52 @@ public static class RegexCodeGenerator
         }
 
         return builder.ToString().TrimEnd();
+    }
+
+    private static void AppendGeneratedRegex(
+        StringBuilder builder,
+        RegexCodeGenerationOptions options,
+        string regexType,
+        string pattern,
+        string input,
+        string replacement,
+        string regexOptions)
+    {
+        var attributeType = options.AssumeUsingDirectives
+            ? "GeneratedRegex"
+            : "System.Text.RegularExpressions.GeneratedRegex";
+
+        builder.AppendLine("partial class Program");
+        builder.AppendLine("{");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"    [{attributeType}({pattern}, {regexOptions})]");
+        builder.AppendLine(CultureInfo.InvariantCulture, $"    private static partial {regexType} MyRegex();");
+        builder.AppendLine();
+        builder.AppendLine("    private static void Main()");
+        builder.AppendLine("    {");
+
+        switch (options.SampleKind)
+        {
+            case RegexCodeSampleKind.Find:
+                builder.AppendLine(CultureInfo.InvariantCulture, $"        var mc = MyRegex().Matches({input});");
+                if (options.GenerateLoop)
+                {
+                    builder.AppendLine("        foreach (var ma in mc)");
+                    builder.AppendLine("        {");
+                    builder.AppendLine("        }");
+                }
+                break;
+            case RegexCodeSampleKind.Replace:
+                builder.AppendLine(CultureInfo.InvariantCulture, $"        var result = MyRegex().Replace({input}, {replacement});");
+                break;
+            case RegexCodeSampleKind.Split:
+                builder.AppendLine(CultureInfo.InvariantCulture, $"        var parts = MyRegex().Split({input});");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(options), options.SampleKind, "Unknown sample kind.");
+        }
+
+        builder.AppendLine("    }");
+        builder.Append('}');
     }
 
     private static void AppendFind(

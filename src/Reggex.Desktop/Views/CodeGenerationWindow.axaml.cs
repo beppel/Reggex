@@ -50,6 +50,7 @@ public partial class CodeGenerationWindow : Window
             return;
         }
 
+        InstanceMethodOption.IsEnabled = GeneratedRegexOption.IsChecked != true;
         GenerateLoopOption.IsEnabled = _sampleKind == RegexCodeSampleKind.Find;
         if (!GenerateLoopOption.IsEnabled)
         {
@@ -63,7 +64,8 @@ public partial class CodeGenerationWindow : Window
             InstanceMethodOption.IsChecked == true,
             AssumeUsingOption.IsChecked == true,
             VerbatimStringsOption.IsChecked == true,
-            GenerateLoopOption.IsChecked == true));
+            GenerateLoopOption.IsChecked == true,
+            GeneratedRegexOption.IsChecked == true));
     }
 
     private void OnCloseClick(object? sender, RoutedEventArgs args) => Close();
