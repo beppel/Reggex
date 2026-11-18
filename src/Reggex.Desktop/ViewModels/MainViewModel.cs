@@ -5,7 +5,7 @@ using Reggex.Core;
 
 namespace Reggex.Desktop.ViewModels;
 
-public partial class MainViewModel : ViewModelBase
+public partial class MainViewModel : ViewModelBase, IDisposable
 {
     private readonly IRegexEngine _regexEngine;
     private CancellationTokenSource? _evaluationCancellation;
@@ -200,7 +200,6 @@ public partial class MainViewModel : ViewModelBase
     private void ScheduleEvaluation()
     {
         _evaluationCancellation?.Cancel();
-        _evaluationCancellation?.Dispose();
 
         var cancellation = new CancellationTokenSource();
         _evaluationCancellation = cancellation;
@@ -344,6 +343,13 @@ public partial class MainViewModel : ViewModelBase
     {
         ArgumentNullException.ThrowIfNull(match);
         SelectedMatchIndex = Matches.IndexOf(match);
+    }
+
+    public void Dispose()
+    {
+        _evaluationCancellation?.Cancel();
+        _evaluationCancellation = null;
+        GC.SuppressFinalize(this);
     }
 
     private sealed record Evaluation(
