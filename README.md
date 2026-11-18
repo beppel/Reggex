@@ -1,6 +1,8 @@
 # Reggex
 
-Reggex is a desktop application for building and testing .NET regular expressions. Edit a pattern and sample text side by side, inspect every match and its groups, and see matching text highlighted directly in the editable source editor.
+**A desktop app for building and testing .NET regular expressions.** Edit a pattern and sample text side by side, inspect matches and capture groups, and see matching text highlighted in the editable source editor.
+
+![Reggex desktop application showing a .NET regex pattern and its matches](documentation/images/reggex-main-window.png)
 
 ## Features
 
@@ -14,13 +16,19 @@ Reggex is a desktop application for building and testing .NET regular expression
 
 Reggex uses .NET's `System.Text.RegularExpressions` engine. Pattern syntax and behavior follow .NET regular expressions.
 
-## Requirements
+## Download
 
-- .NET 10 SDK
+Download the latest self-contained build for Windows x64, Linux x64, or macOS ARM64 from [GitHub Releases](https://github.com/beppel/Reggex/releases/latest). Packages include the .NET runtime; Linux still requires the native libraries needed by the desktop environment.
 
-## Run
+- Windows x64: `Reggex-win-x64.zip`
+- Linux x64: `Reggex-linux-x64.tar.gz`
+- macOS ARM64: `Reggex-osx-arm64.tar.gz`
 
-From the repository root:
+Each release also includes `SHA256SUMS.txt` to verify the downloads.
+
+## Run from source
+
+Requires the .NET 10 SDK. From the repository root:
 
 ```sh
 dotnet run --project src/Reggex.Desktop
@@ -41,6 +49,6 @@ dotnet test src/Reggex.Desktop.Tests
 - `src/Reggex.Desktop` contains the Avalonia desktop interface and its MVVM presentation logic.
 - `src/Reggex.Core.Tests` contains unit tests for Core behavior.
 - `src/Reggex.Desktop.Tests` contains tests for desktop presentation logic and code generation.
-- `documentation` contains the architecture notes and project roadmap.
+- `documentation` contains the architecture notes, screenshot, and project roadmap.
 
-The UI is built with Avalonia and CommunityToolkit.Mvvm. Cross-platform runtime validation and release packaging are still in progress; see [the roadmap](documentation/roadmap.md) before treating published artifacts as supported releases.
+The UI is built with Avalonia and CommunityToolkit.Mvvm. Cross-platform runtime validation is still in progress; see [the roadmap](documentation/roadmap.md) for current support status.

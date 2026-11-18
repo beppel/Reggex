@@ -1,0 +1,138 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.403
+      - name: Run test suites
+        shell: pwsh
+        run: |
+          dotnet test src/Reggex.Core.Tests
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet test src/Reggex.Desktop.Tests
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  build:
+    needs: tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            archive: zip
+          - os: ubuntu-latest
+            rid: linux-x64
+            archive: tar.gz
+          - os: macos-latest
+            rid: osx-arm64
+            archive: tar.gz
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.403
+      - name: Publish self-contained single-file app
+        run: dotnet publish src/Reggex.Desktop -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Smoke test Windows app
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath publish/Reggex.Desktop.exe -PassThru
+          try {
+            $deadline = (Get-Date).AddSeconds(30)
+            do {
+              Start-Sleep -Milliseconds 500
+              $process.Refresh()
+            } until ($process.MainWindowHandle -ne 0 -or $process.HasExited -or (Get-Date) -gt $deadline)
+            if ($process.HasExited) { throw "App exited with code $($process.ExitCode)." }
+            if ($process.MainWindowHandle -eq 0) { throw "App window did not appear." }
+          }
+          finally {
+            if (-not $process.HasExited) {
+              $null = $process.CloseMainWindow()
+              if (-not $process.WaitForExit(5000)) { Stop-Process -Id $process.Id }
+            }
+          }
+      - name: Smoke test Linux app
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          set +e
+          timeout --signal=TERM 15s xvfb-run -a ./publish/Reggex.Desktop
+          status=$?
+          set -e
+          if [ "$status" -ne 124 ]; then
+            echo "App smoke test exited unexpectedly with status $status."
+            exit "$status"
+          fi
+      - name: Smoke test macOS app
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          ./publish/Reggex.Desktop > app-smoke.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true; wait "$app_pid" 2>/dev/null || true' EXIT
+          sleep 15
+          if ! kill -0 "$app_pid" 2>/dev/null; then
+            cat app-smoke.log
+            echo "App exited before the smoke-test window elapsed."
+            exit 1
+          fi
+      - name: Package Windows build
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force package | Out-Null
+          Copy-Item publish/Reggex.Desktop.exe package/Reggex.exe
+          Copy-Item LICENSE package/LICENSE
+          Compress-Archive -Path package/* -DestinationPath Reggex-${{ matrix.rid }}.zip
+      - name: Package Unix build
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          mkdir package
+          cp publish/Reggex.Desktop package/Reggex
+          cp LICENSE package/LICENSE
+          chmod +x package/Reggex
+          tar -czf "Reggex-${{ matrix.rid }}.tar.gz" -C package .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reggex-${{ matrix.rid }}
+          path: Reggex-${{ matrix.rid }}.${{ matrix.archive }}
+          if-no-files-found: error
+          retention-days: 5
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: reggex-*
+          path: release-assets
+          merge-multiple: true
+      - name: Generate checksums
+        run: cd release-assets && sha256sum Reggex-* > SHA256SUMS.txt
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release-assets/* --title "$GITHUB_REF_NAME" --generate-notes

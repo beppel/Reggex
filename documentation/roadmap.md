@@ -4,7 +4,7 @@ These milestones establish the product incrementally without committing to specu
 
 ## Current status — 18 November 2026
 
-Milestones 1–4 are implemented. The Core suite has 37 passing tests and the Desktop suite has 32 (69 total); run both explicitly because the Desktop test project is not included in `Reggex.slnx`. Find, Replace, Split, C# generation (including `[GeneratedRegex]`), match/capture details, and keyboard shortcuts are implemented. Manual UI acceptance and Linux/macOS runtime validation remain outstanding; publish targets below are plans, not verified release artifacts.
+Milestones 1–4 are implemented. The Core suite has 37 passing tests and the Desktop suite has 32 (69 total); run both explicitly because the Desktop test project is not included in `Reggex.slnx`. Find, Replace, Split, C# generation (including `[GeneratedRegex]`), match/capture details, and keyboard shortcuts are implemented. Self-contained single-file candidates for all three target RIDs build on Windows, and the Windows app starts successfully. Linux/macOS candidates have not been runtime-tested locally; cross-platform runtime validation and manual UI acceptance remain outstanding. The tag-triggered release workflow runs native-platform smoke checks before publishing any release.
 
 Run the suites from the repository root:
 
@@ -22,14 +22,14 @@ dotnet test src/Reggex.Desktop.Tests
    - On Linux, cover both X11 and Wayland sessions; on each platform check file dialogs, clipboard behavior, fonts/icons, resizing, keyboard shortcuts, error presentation, and Find/Replace/Split interactions.
    - Verify match highlighting, invisible-character markers, and generated-code output at common display scales.
    - Add automated platform smoke coverage where practical; record any platform-specific limitations.
-6. **Release readiness — planned**:
+6. **Release readiness — in progress**:
    - Verify license notices, release documentation, and platform-specific packaging prerequisites.
    - Produce and run self-contained single-file publish candidates for `win-x64`, `linux-x64`, and `osx-arm64`:
 
      ```sh
-     dotnet publish src/Reggex.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-     dotnet publish src/Reggex.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
-     dotnet publish src/Reggex.Desktop -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true
+     dotnet publish src/Reggex.Desktop -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+     dotnet publish src/Reggex.Desktop -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+     dotnet publish src/Reggex.Desktop -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
      ```
 
    - Evaluate Native AOT separately for each RID with `-p:PublishAot=true`; first confirm Avalonia and all dependencies are compatible, resolve trimming/AOT warnings, and smoke-test each output before declaring support.
@@ -38,6 +38,7 @@ dotnet test src/Reggex.Desktop.Tests
      dotnet publish src/Reggex.Desktop -c Release -r linux-x64 --self-contained true -p:PublishAot=true
      dotnet publish src/Reggex.Desktop -c Release -r osx-arm64 --self-contained true -p:PublishAot=true
      ```
+   - A tag-triggered GitHub Actions workflow is added to run both test suites, publish and smoke-test the three targets, package them, generate checksums, and attach artifacts to a GitHub Release.
    - Record artifact size, startup behavior, signing, and distribution steps. Do not treat these publish commands as validated until the cross-platform checks pass.
 
 Keep Core independently testable. Additional regex engines can be evaluated when there is a concrete user need.
