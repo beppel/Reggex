@@ -74,4 +74,17 @@ public class DotNetRegexEngineSplitTests
         Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
         Assert.Empty(result.Segments);
     }
+
+    [Fact]
+    public void SplitReturnsInvalidOptionsWhenOptionsAreIncompatible()
+    {
+        var request = new RegexRequest(@"\w+", "abc", RegexOptions.ECMAScript | RegexOptions.RightToLeft);
+
+        var result = _engine.Split(request);
+
+        Assert.Equal(RegexExecutionStatus.InvalidPattern, result.Status);
+        Assert.Equal(RegexExecutionErrorCode.InvalidOptions, result.Error!.Code);
+        Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
+        Assert.Empty(result.Segments);
+    }
 }

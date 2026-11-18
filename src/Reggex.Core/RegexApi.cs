@@ -87,7 +87,10 @@ public enum RegexExecutionErrorCode
     InvalidPattern,
 
     /// <summary>The execution exceeded the configured timeout.</summary>
-    Timeout
+    Timeout,
+
+    /// <summary>The requested options are unsupported or mutually incompatible.</summary>
+    InvalidOptions
 }
 
 /// <summary>Provides machine-readable details about an execution failure.</summary>
@@ -139,6 +142,16 @@ public sealed record RegexExecutionResult
             new RegexExecutionError(RegexExecutionErrorCode.InvalidPattern, details, position));
     }
 
+    /// <summary>Creates a result for unsupported or mutually incompatible regex options.</summary>
+    public static RegexExecutionResult InvalidOptions(string details)
+    {
+        ArgumentNullException.ThrowIfNull(details);
+        return new RegexExecutionResult(
+            RegexExecutionStatus.InvalidPattern,
+            ImmutableArray<RegexMatchResult>.Empty,
+            new RegexExecutionError(RegexExecutionErrorCode.InvalidOptions, details));
+    }
+
     /// <summary>Creates a result for an execution that exceeded its timeout.</summary>
     public static RegexExecutionResult TimedOut(string? details = null)
         => new(
@@ -185,6 +198,16 @@ public sealed record RegexReplacementResult
             RegexExecutionStatus.InvalidPattern,
             string.Empty,
             new RegexExecutionError(RegexExecutionErrorCode.InvalidPattern, details, position));
+    }
+
+    /// <summary>Creates a result for unsupported or mutually incompatible regex options.</summary>
+    public static RegexReplacementResult InvalidOptions(string details)
+    {
+        ArgumentNullException.ThrowIfNull(details);
+        return new RegexReplacementResult(
+            RegexExecutionStatus.InvalidPattern,
+            string.Empty,
+            new RegexExecutionError(RegexExecutionErrorCode.InvalidOptions, details));
     }
 
     /// <summary>Creates a result for a replacement operation that exceeded its timeout.</summary>
@@ -236,6 +259,16 @@ public sealed record RegexSplitResult
             RegexExecutionStatus.InvalidPattern,
             ImmutableArray<string>.Empty,
             new RegexExecutionError(RegexExecutionErrorCode.InvalidPattern, details, position));
+    }
+
+    /// <summary>Creates a result for unsupported or mutually incompatible regex options.</summary>
+    public static RegexSplitResult InvalidOptions(string details)
+    {
+        ArgumentNullException.ThrowIfNull(details);
+        return new RegexSplitResult(
+            RegexExecutionStatus.InvalidPattern,
+            ImmutableArray<string>.Empty,
+            new RegexExecutionError(RegexExecutionErrorCode.InvalidOptions, details));
     }
 
     /// <summary>Creates a result for a split operation that exceeded its timeout.</summary>

@@ -19,6 +19,14 @@ public sealed class DotNetRegexEngine : IRegexEngine
         {
             return RegexExecutionResult.InvalidPattern(exception.Message, exception.Offset);
         }
+        catch (ArgumentException exception) when (string.Equals(exception.ParamName, "options", StringComparison.OrdinalIgnoreCase))
+        {
+            return RegexExecutionResult.InvalidOptions(exception.Message);
+        }
+        catch (ArgumentException exception)
+        {
+            return RegexExecutionResult.InvalidPattern(exception.Message);
+        }
 
         try
         {
@@ -56,6 +64,14 @@ public sealed class DotNetRegexEngine : IRegexEngine
         {
             return RegexReplacementResult.InvalidPattern(exception.Message, exception.Offset);
         }
+        catch (ArgumentException exception) when (string.Equals(exception.ParamName, "options", StringComparison.OrdinalIgnoreCase))
+        {
+            return RegexReplacementResult.InvalidOptions(exception.Message);
+        }
+        catch (ArgumentException exception)
+        {
+            return RegexReplacementResult.InvalidPattern(exception.Message);
+        }
         catch (RegexMatchTimeoutException exception)
         {
             return RegexReplacementResult.TimedOut(exception.Message);
@@ -75,6 +91,14 @@ public sealed class DotNetRegexEngine : IRegexEngine
         catch (RegexParseException exception)
         {
             return RegexSplitResult.InvalidPattern(exception.Message, exception.Offset);
+        }
+        catch (ArgumentException exception) when (string.Equals(exception.ParamName, "options", StringComparison.OrdinalIgnoreCase))
+        {
+            return RegexSplitResult.InvalidOptions(exception.Message);
+        }
+        catch (ArgumentException exception)
+        {
+            return RegexSplitResult.InvalidPattern(exception.Message);
         }
         catch (RegexMatchTimeoutException exception)
         {

@@ -61,6 +61,13 @@ public class RegexApiTests
         Assert.Equal(RegexExecutionStatus.TimedOut, timeout.Status);
         Assert.Empty(timeout.Matches);
         Assert.Equal(RegexExecutionErrorCode.Timeout, timeout.Error!.Code);
+
+        var invalidOptions = RegexExecutionResult.InvalidOptions("Incompatible options");
+        Assert.Equal(RegexExecutionStatus.InvalidPattern, invalidOptions.Status);
+        Assert.Empty(invalidOptions.Matches);
+        Assert.Equal(RegexExecutionErrorCode.InvalidOptions, invalidOptions.Error!.Code);
+        Assert.Equal("Incompatible options", invalidOptions.Error.Details);
+        Assert.Null(invalidOptions.Error.Position);
     }
 
     [Fact]

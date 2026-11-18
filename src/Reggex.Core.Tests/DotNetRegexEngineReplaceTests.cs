@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Reggex.Core;
 
 namespace Reggex.Core.Tests;
@@ -57,5 +58,30 @@ public class DotNetRegexEngineReplaceTests
         Assert.Equal(RegexExecutionErrorCode.Timeout, result.Error!.Code);
         Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
         Assert.Equal(string.Empty, result.Output);
+    }
+
+    [Fact]
+    public void ReplaceReturnsInvalidOptionsWhenOptionsAreIncompatible()
+    {
+        var request = new RegexRequest(@"\w+", "abc", RegexOptions.ECMAScript | RegexOptions.Singleline);
+
+        var result = _engine.Replace(request, "replacement");
+
+        Assert.Equal(RegexExecutionStatus.InvalidPattern, result.Status);
+        Assert.Equal(RegexExecutionErrorCode.InvalidOptions, result.Error!.Code);
+        Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
+        Assert.Equal(string.Empty, result.Output);
+    }
+
+    [Fact]
+    public void ReplaceTreatsUnrecognizedSubstitutionsAsLiterals()
+    {
+        var request = new RegexRequest(@"\w+", "abc");
+
+        var result = _engine.Replace(request, "${}");
+
+        Assert.Equal(RegexExecutionStatus.Success, result.Status);
+        Assert.Equal("${}", result.Output);
+        Assert.Null(result.Error);
     }
 }

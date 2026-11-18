@@ -262,7 +262,7 @@ public partial class MainViewModel : ViewModelBase
         {
             // A newer edit superseded this evaluation.
         }
-        catch (ArgumentOutOfRangeException exception)
+        catch (Exception exception)
         {
             if (version != _evaluationVersion)
             {
@@ -273,7 +273,7 @@ public partial class MainViewModel : ViewModelBase
             ReplacementOutput = string.Empty;
             SplitSegments = [];
             HasError = true;
-            ErrorMessage = $"The selected regex options are not supported together. {exception.Message}";
+            ErrorMessage = exception.Message;
             ErrorPosition = string.Empty;
             IsEvaluating = false;
         }
@@ -309,9 +309,9 @@ public partial class MainViewModel : ViewModelBase
         => status switch
         {
             RegexExecutionStatus.Success => RegexExecutionResult.Succeeded([]),
-            RegexExecutionStatus.InvalidPattern => RegexExecutionResult.InvalidPattern(
-                error?.Details,
-                error?.Position),
+            RegexExecutionStatus.InvalidPattern => error?.Code == RegexExecutionErrorCode.InvalidOptions
+                ? RegexExecutionResult.InvalidOptions(error.Details ?? string.Empty)
+                : RegexExecutionResult.InvalidPattern(error?.Details, error?.Position),
             RegexExecutionStatus.TimedOut => RegexExecutionResult.TimedOut(error?.Details),
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Unknown regex execution status.")
         };
@@ -333,7 +333,9 @@ public partial class MainViewModel : ViewModelBase
     private static string GetErrorMessage(RegexExecutionResult result)
         => result.Status switch
         {
-            RegexExecutionStatus.InvalidPattern => result.Error?.Details ?? "The regular expression is invalid.",
+            RegexExecutionStatus.InvalidPattern => result.Error?.Code == RegexExecutionErrorCode.InvalidOptions
+                ? $"The selected regex options are not supported together. {result.Error.Details}"
+                : result.Error?.Details ?? "The regular expression is invalid.",
             RegexExecutionStatus.TimedOut => "Regex execution timed out. " + result.Error?.Details,
             _ => string.Empty
         };

@@ -217,6 +217,18 @@ public class DotNetRegexEngineTests
         Assert.Empty(result.Matches);
     }
 
+    [Fact]
+    public void ExecuteReturnsInvalidOptionsWhenOptionsAreIncompatible()
+    {
+        var result = Execute(@"\w+", "abc", RegexOptions.ECMAScript | RegexOptions.ExplicitCapture);
+
+        Assert.Equal(RegexExecutionStatus.InvalidPattern, result.Status);
+        Assert.Empty(result.Matches);
+        Assert.NotNull(result.Error);
+        Assert.Equal(RegexExecutionErrorCode.InvalidOptions, result.Error.Code);
+        Assert.False(string.IsNullOrWhiteSpace(result.Error.Details));
+    }
+
     private RegexExecutionResult Execute(
         string pattern,
         string input,
