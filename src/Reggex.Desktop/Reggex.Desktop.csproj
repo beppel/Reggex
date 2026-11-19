@@ -6,6 +6,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
