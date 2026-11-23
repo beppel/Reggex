@@ -267,6 +267,12 @@ public partial class MainWindow : Window
     private async void OnGenerateCodeClick(object? sender, RoutedEventArgs args)
         => await ShowCodeGenerationWindowAsync();
 
+    private async void OnAboutClick(object? sender, RoutedEventArgs args)
+    {
+        var dialog = new AboutWindow();
+        await dialog.ShowDialog(this);
+    }
+
     private async Task ShowCodeGenerationWindowAsync()
     {
         if (DataContext is not MainViewModel viewModel)

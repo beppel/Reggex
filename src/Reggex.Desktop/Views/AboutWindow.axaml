@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Reggex.Desktop.Views.AboutWindow"
+        Title="About Reggex"
+        Icon="/Assets/favicon.ico"
+        RequestedThemeVariant="Dark"
+        Width="380" Height="270"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#10141B">
+    <StackPanel Margin="28" Spacing="14" VerticalAlignment="Center">
+        <TextBlock Text="Reggex" FontSize="25" FontWeight="Bold" HorizontalAlignment="Center" />
+        <TextBlock Text="Regular Expression Tester" Foreground="#9BA7B8" HorizontalAlignment="Center" />
+        <Border Height="1" Background="#293343" Margin="0,4" />
+        <TextBlock Text="Created by Beppe Lombardi" HorizontalAlignment="Center" />
+        <Button Content="github.com/beppel/Reggex" Click="OnRepositoryClick"
+                HorizontalAlignment="Center" Padding="12,7" />
+        <Button Content="Close" Click="OnCloseClick" HorizontalAlignment="Center" Padding="16,7" />
+    </StackPanel>
+</Window>
